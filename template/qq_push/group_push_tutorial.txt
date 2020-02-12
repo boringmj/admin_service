@@ -1,0 +1,10 @@
+${organization}新教程通知
+
+标题:${title}
+作者:${nickname}
+内容:${content}
+时间:${date}
+
+地址:${url}
+
+更多详情请打开${organization}查看哟

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <title>${name}登录</title>
+  <meta name="description" content="particles.js is a lightweight JavaScript library for creating particles.">
+  <meta name="author" content="Vincent Garreau" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" media="screen" href="/?class=public&mode=login/css/style.css&type=text/css">
+  <link rel="stylesheet" type="text/css" href="/?class=public&mode=login/css/reset.css&type=text/css"/>
+</head>
+<body>
+
+<div id="particles-js">
+		<div class="login">
+			<div class="login-top">
+				登录
+			</div>
+			<div class="login-center clearfix">
+				<div class="login-center-img"><img src="${public}/login/img/name.png"/></div>
+				<div class="login-center-input">
+					<input type="text" name="user" id="user" value="" placeholder="请输入您的用户名" onfocus="this.placeholder=''" onblur="this.placeholder='请输入您的用户名'"/>
+					<div class="login-center-input-text">用户名</div>
+				</div>
+			</div>
+			<div class="login-center clearfix">
+				<div class="login-center-img"><img src="${public}/login/img/password.png"/></div>
+				<div class="login-center-input">
+					<input type="password" name="password" id="password" value="" placeholder="请输入您的密码" onfocus="this.placeholder=''" onblur="this.placeholder='请输入您的密码'"/>
+					<div class="login-center-input-text">密码</div>
+				</div>
+			</div>
+			<div class="login-button">
+				登录
+			</div>
+		</div>
+		<div class="sk-rotating-plane"></div>
+</div>
+
+<!-- scripts -->
+<script src="/?class=public&mode=login/js/particles.min.js&type=text/javascript"></script>
+<script src="/?class=public&mode=login/js/app.js&type=text/javascript"></script>
+<script src="/?class=public&mode=lib/js/ium.js&type=text/javascript"></script>
+<script src="${public}/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/?class=public&mode=lib/js/jquery.min.js&type=text/javascript"></script>
+<script type="text/javascript">
+	function hasClass(elem, cls) {
+	  cls = cls || '';
+	  if (cls.replace(/\s/g, '').length == 0) return false; //当cls没有参数时，返回false
+	  return new RegExp(' ' + cls + ' ').test(' ' + elem.className + ' ');
+	}
+	 
+	function addClass(ele, cls) {
+	  if (!hasClass(ele, cls)) {
+	    ele.className = ele.className == '' ? cls : ele.className + ' ' + cls;
+	  }
+	}
+	 
+	function removeClass(ele, cls) {
+	  if (hasClass(ele, cls)) {
+	    var newClass = ' ' + ele.className.replace(/[\t\r\n]/g, '') + ' ';
+	    while (newClass.indexOf(' ' + cls + ' ') >= 0) {
+	      newClass = newClass.replace(' ' + cls + ' ', ' ');
+	    }
+	    ele.className = newClass.replace(/^\s+|\s+$/g, '');
+	  }
+	}
+			//发起登录请求
+			document.querySelector(".login-button").onclick = function(){
+				//加载动画
+				addClass(document.querySelector(".login"), "active")
+				addClass(document.querySelector(".sk-rotating-plane"), "active")
+				document.querySelector(".login").style.display = "none"
+				//基础数据
+				var submit_nonce=_getRandomString(12);
+				var submit_time="";
+				var submit_time_stamp=timest();
+				//拼接基础参数
+				var submit_value="app_id=vxRLjxyaGTNa1573840643&nonce="+submit_nonce+"&time="+"&time_stamp="+submit_time_stamp;
+				//获取提交数据
+				var user_name=document.getElementById("user").value;
+				var user_pass=document.getElementById("password").value;
+				//拼接上提交数据
+				submit_value+="&user="+user_name+"&passwd="+user_pass;
+				//取得签名
+				var submint_sign=hex_md5("from=web&"+submit_value+"&app_key=3t8afM2j4HEWiOXjqiqr96XikOshI6P6");
+				$.ajax({
+					type:"POST",
+					dataType:"json",
+					url:"/?class=api&mode=login&from=web",
+					data:{"user":user_name,"passwd":user_pass,"nonce":submit_nonce,"time":submit_time,"time_stamp":submit_time_stamp,"sign":submint_sign,"app_id":"vxRLjxyaGTNa1573840643"},
+					success:function (result){
+						if(result["api"]["code"]==0){
+							removeClass(document.querySelector(".login"), "active");
+							removeClass(document.querySelector(".sk-rotating-plane"), "active");
+							document.querySelector(".login").style.display = "block";
+							if(""==="${value}")
+								window.location.href="/?class=admin";
+							else
+								window.location.href="/?${value}";
+						}
+						else{
+								setTimeout(function(){
+								removeClass(document.querySelector(".login"), "active");
+								removeClass(document.querySelector(".sk-rotating-plane"), "active");
+								document.querySelector(".login").style.display = "block";
+								layui.use(['layer','form'],function(){
+									var layer=layui.layer;
+									layer.msg(result["api"]["content"]);
+								});
+							},1000)
+						}
+					},
+					error:function(){
+						setTimeout(function(){
+							removeClass(document.querySelector(".login"), "active");
+							removeClass(document.querySelector(".sk-rotating-plane"), "active");
+							document.querySelector(".login").style.display = "block";
+							layui.use(['layer','form'],function(){
+								var layer=layui.layer;
+								layer.msg("异常错误");
+							});
+						},1000)
+					}
+				});
+			}
+</script>
+</body>
+</html>

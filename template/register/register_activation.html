@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>填写用户信息以激活用户</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/?class=public&mode=lib/layui/css/layui.css&type=text/css">
+    <link rel="stylesheet" href="/?class=public&mode=lib/css/scroll-bar.css&type=text/css">
+    <link rel="stylesheet" href="/?class=public&mode=lib/css/sub-page.css&type=text/css">
+</head>
+<body>
+<div class="ok-body">
+    <blockquote class="layui-elem-quote">填写用户信息以激活用户</blockquote>
+    <!--form表单-->
+    <form class="layui-form layui-form-pane ok-form">
+        <div class="layui-form-item layui-hide">
+            <label class="layui-form-label">UUID</label>
+            <div class="layui-input-block">
+            <input type="text" name="uuid" lay-verify="required" readonly autocomplete="off" placeholder="请输入UUID" value="${uuid}" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input type="text" name="user" readonly placeholder="请输入用户名" value="${user}" autocomplete="off" class="layui-input" lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">昵称</label>
+            <div class="layui-input-block">
+                <input type="text" name="nickname" placeholder="请输入昵称" autocomplete="off" class="layui-input" lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="passwd" placeholder="请输入密码" autocomplete="off" class="layui-input" lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">重复密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="rpasswd" placeholder="请再次输入密码" autocomplete="off" class="layui-input" lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="add">立即激活</button>
+            </div>
+        </div>
+    </form>
+    <div class="layui-col-md12">
+      <div class="layui-card">
+        <div class="layui-card-header">温馨提醒</div>
+        <div class="layui-card-body">
+            该链接在修改成功后失效<br>昵称合法长度:${nickname_len_min}到${nickname_len_max}位<br>密码合法长度:${passwd_len_min}到${passwd_len_max}位<br>一个全角字符串长度:${C_str_len}位,一个半角字符串长度${E_str_len}位
+        </div>
+      </div>
+    </div>
+</div>
+<!--js逻辑-->
+<script src="${public}/lib/layui/layui.js"></script>
+<script>
+    function delCookie(key) {
+        var date = new Date();
+        date.setTime(date.getTime() - 1);
+        var delValue = getCookie(key);
+        if (!!delValue) {
+            document.cookie = key+'='+delValue+';expires='+date.toGMTString();
+        }
+    }
+    function closeCurrentPage() {
+        var userAgent = navigator.userAgent;
+        if (userAgent.indexOf("Firefox") != -1 || userAgent.indexOf("Chrome") !=-1) {
+            window.location.href="about:blank";
+            window.close();
+        } else {
+            window.opener = null;
+            window.open("", "_self");
+            window.close();
+        }
+    }
+    layui.use(['element', 'form', 'jquery', 'laydate'], function () {
+        var element = layui.element;
+        var table = layui.table;
+        var form = layui.form;
+        var $ = layui.jquery;
+        var laydate = layui.laydate;
+
+        form.on('submit(add)', function (data) {
+            console.log(data.field);
+            layer.load();
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "/?class=register&mode=activation&uuid=${uuid}",
+                data: data.field,
+                success: function (result){
+                    console.log(result);
+                    if(result.code===0)
+                    {
+                        layer.closeAll('loading');
+                        layer.msg("激活成功", {icon: 6, time: 1000});
+                        delCookie("setuuid");
+                        closeCurrentPage();
+                    }else
+                    {
+                        layer.msg(result.register.content);
+                        layer.closeAll('loading');
+                    }
+                },
+                error : function(){
+                    layer.msg("异常错误");
+                    layer.closeAll('loading');
+                }
+            });
+            return false;
+        });
+    })
+</script>
+</body>
+</html>

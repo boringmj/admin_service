@@ -1,0 +1,56 @@
+<?php
+
+#program/system
+
+//补全预处理参数
+if(empty($_POST['app_id']))
+    $_POST['app_id']="";
+if(getPermission($_POST['app_id'],'system_api')==='Y')
+{
+    if(!empty($_GET['mode'])&&!preg_match('/(.*m.*a.*i.*n.*|.*\..*)/',$_GET['mode']))
+    {
+        $path='./program/system/'.$_GET['mode'].'.php';
+        if(is_file($path))
+        {
+            if(!$result['exit'])
+                include_program('system/'.$_GET['mode']);
+        }
+        else
+        {
+            $result_code=1005;
+            $result_content='mode类不在指定范围内';
+            $result['array'][]=array(
+                'title'=>"失败",
+                'content'=>$result_content,
+                'code'=>$result_code,
+                'variable'=>$_GET['mode']
+            );
+            $result['exit']=1;
+        }
+    }
+    else
+    {
+        $result_code=1006;
+        $result_content='指定api接口参数不合法';
+        $result['array'][]=array(
+            'title'=>"失败",
+            'content'=>$result_content,
+            'code'=>$result_code,
+            'variable'=>''
+        );
+        $result['exit']=1;
+    }
+}
+else
+{
+    $result_code=10000;
+    $result_content='无权调用接口';
+    $result['array']['system']=array(
+        'title'=>"失败",
+        'content'=>$result_content,
+        'code'=>$result_code,
+        'variable'=>''
+    );
+    $result['exit']=1;
+}
+?>

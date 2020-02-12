@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>${name}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" href="${public}/admin/css/oksub.css" media="all"/>
+	<script type="text/javascript" src="${public}/admin/lib/echarts/echarts.min.js"></script>
+	<script type="text/javascript" src="${public}/admin/lib/echarts/echarts.theme.js"></script>
+	<script type="text/javascript" src="${public}/admin/lib/echarts/world/js/china.js"></script>
+</head>
+<body class="ok-body-scroll console">
+<div class="ok-body home">
+	<div class="layui-row layui-col-space15">
+		<div class="layui-col-xs6 layui-col-md4">
+			<div class="layui-card">
+				<div class="ok-card-body">
+					<div class="img-box" ok-pc-in-show>
+						<img src="${public}/admin/images/home-01.png" alt="none"/>
+					</div>
+					<div class="cart-r">
+						<div class="stat-text incomes-num">${money}</div>
+						<div class="stat-heading">余额</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-col-xs6 layui-col-md4">
+			<div class="layui-card ">
+				<div class="ok-card-body">
+					<div class="img-box" ok-pc-in-show>
+						<img src="${public}/admin/images/home-02.png" alt="none"/>
+					</div>
+					<div class="cart-r">
+						<div class="stat-text goods-num">${integral}</div>
+						<div class="stat-heading">积分</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-col-xs6 layui-col-md4">
+			<div class="layui-card">
+				<div class="ok-card-body">
+					<div class="img-box" ok-pc-in-show>
+						<img src="${public}/admin/images/home-03.png" alt="none"/>
+					</div>
+					<div class="cart-r">
+						<div class="stat-text blogs-num">${application_count}</div>
+						<div class="stat-heading">应用</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-row layui-col-space15">
+		<div class="layui-col-md4">
+			<div class="layui-card">
+				<div class="layui-card-header">
+					<div class="ok-card-title">重要通知</div>
+				</div>
+				<div class="ok-card-body map-body">
+					<div class="progress-box ">
+						<div class="pro-data">
+							<h4 class="por-title">免费送福利啦</h4>
+							<div class="por-txt pro-a">新开通后台功能的用户可免费开通后台服务一个月,还在等什么,快邀请你的小伙伴们来注册吧</div>
+						</div>
+					</div>
+					<div class="progress-box ">
+						<div class="pro-data">
+							<h4 class="por-title">新用户返利活动</h4>
+							<div class="por-txt pro-a">为防止用户恶意注册,泛滥,本站需要收取注册费用,注册费用将会全额返还到您账户的余额上,点击<a href="#">新用户返利</a>领取</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-col-md8">
+			<div class="layui-card">
+				<div class="layui-card-header">
+					<div class="ok-card-title">消费统计</div>
+				</div>
+				<div class="ok-card-body map-body">
+					<div style="height: 100%;" id="userSourceMap"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-row layui-col-space15">
+		<div class="layui-col-md6">
+			<div class="layui-card">
+				<div class="layui-card-header">
+					<div class="ok-card-title">服务定价</div>
+				</div>
+				<div class="ok-card-body map-body">
+					<div class="progress-box ">
+						<div class="pro-data">
+							<h4 class="por-title">免费服务</h4>
+							<div class="por-txt pro-a">
+								每开通一个新的应用及视为一个新的免费服务,每一个新的免费服务包括<br>
+								100个用户上限<br>
+								1个自定义文本<br>
+								100次免费发送邮件<br>
+								1个应用免费托管
+							</div>
+						</div>
+					</div>
+					<div class="progress-box ">
+						<div class="pro-data">
+							<h4 class="por-title">增值服务</h4>
+							<div class="por-txt pro-a">
+								出于大多数用户的需求,我们提供的免费服务是没办法满足的,用户可以根据需求自行购买相应的增值服务<br>
+								增值服务分为开通,续费和购买数量这几类,请用户根据需求自行购买或续费,过期服务不会被立即删除,但是被记录进托管期,托管期内续费将继续正常服务,逾期清除所有数据</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-md6">
+			<div class="layui-card">
+				<div class="layui-card-header">
+					<div class="ok-card-title">后台信息</div>
+				</div>
+				<div class="ok-card-body map-body">
+					<div class="progress-box ">
+						<div class="pro-data">
+							<h4 class="por-title">服务器信息</h4>
+							<div class="por-txt pro-a">
+								出于安全考虑暂不提供
+							</div>
+						</div>
+					</div>
+					<div class="progress-box ">
+						<div class="pro-data">
+							<h4 class="por-title">环境信息</h4>
+							<div class="por-txt pro-a">
+								PHP运行方式:${php_sapi_name}<br>
+								PHP版本:${PHP_VERSION}
+							</div>
+						</div>
+					</div>
+					<div class="progress-box ">
+						<div class="pro-data">
+							<h4 class="por-title">程序信息</h4>
+							<div class="por-txt pro-a">
+								开发者/团队:${organization_development}<br>
+								项目名称:${organization_name}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+<script type="text/javascript" src="${public}/admin/lib/layui/layui.js"></script>
+<script type="text/javascript" src="${public}/admin/js/console.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

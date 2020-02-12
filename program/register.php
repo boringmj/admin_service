@@ -1,0 +1,198 @@
+<?php
+
+##program/register
+
+//补齐未定义的变量,防止警告
+if(!isset($_GET['mode']))
+    $_GET['mode']='';
+if(!isset($_GET['uuid']))
+    $_GET['uuid']='';
+
+$server_time_stamp=time();
+$table_name=$Database->getTablename('user');
+$sql_statement=$Database->object->prepare("SELECT user,time_stamp,proving FROM {$table_name} WHERE uuid=:uuid ORDER BY id DESC LIMIT 0,1");
+$sql_statement->bindParam(':uuid',$_GET['uuid']);
+$sql_statement->execute();
+$result_sql_temp=$sql_statement->fetch();
+if(isset($result_sql_temp['user'])&&isset($result_sql_temp['time_stamp'])&&$result_sql_temp['proving']==='0')
+{
+    if($server_time_stamp<$result_sql_temp['time_stamp']+7*24*60*60)
+    {
+        //确保用户还在可激活状态
+        if($_GET['mode']==='confirm')
+        {
+            //显示激活页面
+            $template='template/register/register_activation.html';
+            if(is_file($template))
+            {
+                $default_content=file_get_contents($template);
+                $content_array=array(
+                    "\${public}"=>$main_config['html_config']['public'],
+                    "\${uuid}"=>$_GET['uuid'],
+                    "\${user}"=>$result_sql_temp['user'],
+                    "\${nickname_len_min}"=>$main_config['user_info']['nickname_len_min'],
+                    "\${nickname_len_max}"=>$main_config['user_info']['nickname_len_max'],
+                    "\${passwd_len_min}"=>$main_config['user_info']['passwd_len_min'],
+                    "\${passwd_len_max}"=>$main_config['user_info']['passwd_len_max'],
+                    "\${C_str_len}"=>strlen('零'),
+                    "\${E_str_len}"=>strlen('0'),
+                    "{\$}"=>'$'
+                );
+                foreach($content_array as $key=>$value)
+                {
+                    $default_content=str_replace($key,$value,$default_content);
+                }
+                $result['html']=$default_content;
+                $result['mode']=2;
+            }
+            else
+            {
+                $result_code=1023;
+                $result_content='缺失公共文件';
+                $result['array']['register']=array(
+                    'title'=>"失败",
+                    'content'=>$result_content,
+                    'code'=>$result_code,
+                    'variable'=>$template
+                );
+                $result['exit']=1;
+            }
+        }
+        else if($_GET['mode']==='activation')
+        {
+            //处理激活请求
+            if(empty($_POST['nickname'])||empty($_POST['passwd'])||empty($_POST['rpasswd']))
+            {
+                $result_code=1011;
+                $result_content='必要参数为空';
+                $result['array']['register']=array(
+                    'title'=>"失败",
+                    'content'=>$result_content,
+                    'code'=>$result_code,
+                    'variable'=>""
+                );
+                $result['exit']=1;
+            }
+            else
+            {
+                $passwd=$_POST['passwd'];
+                $nickname=$_POST['nickname'];
+                if($passwd===$_POST['rpasswd'])
+                {
+                    if(strlen($passwd)<=$main_config['user_info']['passwd_len_max']&&strlen($passwd)>=$main_config['user_info']['passwd_len_min'])
+                    {
+                        if(strlen($nickname)<=$main_config['user_info']['nickname_len_max']&&strlen($nickname)>=$main_config['user_info']['nickname_len_min'])
+                        {
+                            //抛弃超过系统最大存储空间的数据
+                            $nickname=substr($nickname,0,32);
+                            $passwd=md5($main_config['user_info']['start_salt'].$passwd.$main_config['user_info']['end_salt']);
+                            $uuid=getRandomstring(22).time();
+                            $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET passwd=:passwd,nickname=:nickname,uuid=:uuid,identification=1,integral=0,proving=1 WHERE uuid=:o_uuid AND proving=0");
+                            $sql_statement->bindParam(':passwd',$passwd);
+                            $sql_statement->bindParam(':nickname',$nickname);
+                            $sql_statement->bindParam(':uuid',$uuid);
+                            $sql_statement->bindParam(':o_uuid',$_GET['uuid']);
+                            if($sql_statement->execute())
+                            {
+                                $result_code=0;
+                                $result_content='激活成功';
+                                $result['array']['register']=array(
+                                    'title'=>"成功",
+                                    'content'=>$result_content,
+                                    'code'=>$result_code,
+                                    'variable'=>"该用户已允许正常登陆"
+                                );
+                            }
+                            else
+                            {
+                                $result_code=1018;
+                                $result_content='异常错误';
+                                $result['array']['register']=array(
+                                    'title'=>"失败",
+                                    'content'=>$result_content,
+                                    'code'=>$result_code,
+                                    'variable'=>""
+                                );
+                                $result['exit']=1;
+                            }
+                        }
+                        else
+                        {
+                            $result_code=1029;
+                            $result_content='昵称不合法';
+                            $result['array']['register']=array(
+                                'title'=>"失败",
+                                'content'=>$result_content,
+                                'code'=>$result_code,
+                                'variable'=>""
+                            );
+                            $result['exit']=1;
+                        }
+                    }
+                    else
+                    {
+                        $result_code=1028;
+                        $result_content='密码不合法';
+                        $result['array']['register']=array(
+                            'title'=>"失败",
+                            'content'=>$result_content,
+                            'code'=>$result_code,
+                            'variable'=>""
+                        );
+                        $result['exit']=1;
+                    }
+                }
+                else
+                {
+                    $result_code=1027;
+                    $result_content='密码不一致';
+                    $result['array']['register']=array(
+                        'title'=>"失败",
+                        'content'=>$result_content,
+                        'code'=>$result_code,
+                        'variable'=>""
+                    );
+                    $result['exit']=1;
+                }
+            }
+        }
+        else
+        {
+            $result_code=1024;
+            $result_content='指定模式不存在';
+            $result['array']['register']=array(
+                'title'=>"失败",
+                'content'=>$result_content,
+                'code'=>$result_code,
+                'variable'=>$_GET['mode']
+            );
+            $result['exit']=1;
+        }
+    }
+    else
+    {
+        $result_code=1026;
+        $result_content='请求已过期';
+        $result['array']['register']=array(
+            'title'=>"失败",
+            'content'=>$result_content,
+            'code'=>$result_code,
+            'variable'=>""
+        );
+        $result['exit']=1;
+    }
+}
+else
+{
+    $result_code=1025;
+    $result_content='链接已失效';
+    $result['array']['register']=array(
+        'title'=>"失败",
+        'content'=>$result_content,
+        'code'=>$result_code,
+        'variable'=>$_GET['uuid']
+    );
+    $result['exit']=1;
+}
+
+?>

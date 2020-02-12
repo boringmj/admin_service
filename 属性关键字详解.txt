@@ -1,0 +1,10 @@
+=>教程
+	condition	:	审核状态
+		tutorial/Y		通过审核的教程
+		unprocessed/U	没有审核的教程
+		fail/N		没有通过的教程
+		pending/R	正在审核的教程
+		all/*		所有教程
+	type	:	显示类型
+		admin		自己负责的教程
+		*/(!admin)	自己的教程

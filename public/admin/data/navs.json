@@ -1,0 +1,68 @@
+[
+  {
+    "title": "控制台",
+    "href": "/?class=admin&mode=pages/console",
+    "fontFamily": "ok-icon",
+    "icon": "&#xe654;",
+    "spread": true,
+    "isCheck": true
+  },
+  {
+    "title": "管理后台",
+    "href": "/?class=admin&mode=admin",
+    "fontFamily": "ok-icon",
+    "icon": "&#xe6bb;",
+    "spread": false
+  },
+  {
+    "title": "增值服务",
+    "fontFamily": "ok-icon",
+    "icon": "&#xe6ec;",
+    "spread": false,
+    "children": [
+      {
+        "title": "充值余额",
+        "href": "pages/help/ok_font.html",
+        "fontFamily": "ok-icon",
+        "icon": "&#xe6ec;",
+        "spread": false
+      },
+      {
+        "title": "充值积分",
+        "href": "pages/help/plug_directory.html",
+        "fontFamily": "ok-icon",
+        "icon": "&#xe7ce;",
+        "spread": false
+      },
+      {
+        "title": "购买服务",
+        "href": "pages/help/nav_operate.html",
+        "fontFamily": "ok-icon",
+        "icon": "&#xe6b9;",
+        "spread": false
+      }
+    ]
+  },
+  {
+    "title": "联系我们",
+    "fontFamily": "ok-icon",
+    "icon": "&#xe6dc;",
+    "spread": false,
+    "children": [
+      {
+        "title": "客服QQ",
+        "href": "pages/help/ok_font.html",
+        "fontFamily": "ok-icon",
+        "icon": "&#xe6dc;",
+        "spread": false
+      },
+      {
+        "title": "官方Q群",
+        "href": "pages/help/plug_directory.html",
+        "fontFamily": "ok-icon",
+        "icon": "&#xe6dc;",
+        "spread": false
+      }
+    ]
+  }
+]

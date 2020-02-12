@@ -1,0 +1,39 @@
+<?php
+
+#program/api
+
+if(!empty($_GET['mode'])&&!preg_match('/(.*m.*a.*i.*n.*|.*\..*)/',$_GET['mode']))
+{
+    $path='./program/api/'.$_GET['mode'].'.php';
+    if(is_file($path))
+    {
+        if(!$result['exit'])
+            include_program('api/'.$_GET['mode']);
+    }
+    else
+    {
+        $result_code=1005;
+        $result_content='mode类不在指定范围内';
+        $result['array'][]=array(
+            'title'=>"失败",
+            'content'=>$result_content,
+            'code'=>$result_code,
+            'variable'=>$_GET['mode']
+        );
+        $result['exit']=1;
+    }
+}
+else
+{
+    $result_code=1006;
+    $result_content='指定api接口参数不合法';
+    $result['array'][]=array(
+        'title'=>"失败",
+        'content'=>$result_content,
+        'code'=>$result_code,
+        'variable'=>''
+    );
+    $result['exit']=1;
+}
+
+?>

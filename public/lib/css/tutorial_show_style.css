@@ -1,0 +1,31 @@
+html{background:#eee}
+*{letter-spacing:1px;font-family:'Helvetica','Droidsansfallback','Heiti SC';box-sizing:border-box;outline:none;margin:0;padding:0;border:0;text-decoration:none;-webkit-tap-highlight-color:rgba(0,0,0,0);color:#333;}
+body{margin:0 auto;max-width:960px;box-shadow:0px 1px 2px rgba(0,0,0,0.2);min-width:320px;padding-bottom:0.1px}
+#hedadr{background:#fff;text-align:center;box-shadow:0px 1px 2px rgba(0,0,0,0.1)}
+#hedadr img{width:80px;height:80px;margin:48px 0px 16px 0px}
+#hedadr ul{font-size:18px;margin-bottom:8px}
+#hedadr ul i{color:#939393;font-size:14px;font-style:normal}
+#hedadr p{font-size:12px;color:#939393;}
+#hedadr dd{padding:16px 0px 24px 0px}
+#hedadr dd button{cursor:pointer;background:rgba(0,0,0,0);border:solid 1px #009688;width:188px;font-size:14px;color:#009688;border-radius:2px;height:32px}
+
+.title{color:#616161;list-style:none;border-left:solid 4px #009688;margin:12px 8px;padding-left:8px;font-size:14px}
+.show{background:#fff;margin:3px;box-shadow:0px 1px 2px rgba(0,0,0,0.1);border-radius:2px;padding:16px;font-size:14px;color:#616161;line-height:24px;word-wrap:break-word;}
+.show a{color:#009688;}
+.dbshow{background:#000;margin:0px;box-shadow:0px 1px 2px rgba(0,0,0,0.1);border-radius:2px;padding:16px;font-size:14px;color:#ffffff;line-height:24px;word-wrap:break-word;text-align:center;}
+.dbshow a{color:#009688;}
+.pic{white-space:nowrap;overflow-x:auto;margin-top:16px}
+.pic img{height:300px;margin-right:4px;border:solid 1px #eee}
+
+.ad{display:-moz-box;display:-webkit-box;display:box;height:88px}
+.ad:active{background:rgba(0,0,0,0.04)}
+.ad img{width:56px;height:56px;margin:16px;border-radius:8px;background:#eee}
+.ad p{-moz-box-flex:1;-webkit-box-flex:1;box-flex:1;padding:16px 0px}
+.ad p u{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;display:block;font-size:12px}
+a{color:#fff;background:#009688;display:inline-block;width:64px;height:32px;margin:28px 16px;text-align:center;line-height:32px;font-size:12px;border-radius:2px}
+.ad a:active{opacity:0.8;box-shadow:0px 2px 4px rgba(0,0,0,0.2)}
+.pp{background:#009688;width: 100%;padding-top: 15px;padding-bottom: 15px; text-align: left;}
+table{border-collapse:collapse;border-top:solid 1px #eee;width:100%}
+table tr{cursor:pointer;border-bottom:solid 1px #eee;}
+table tr:active{background:#eee;}
+table td{font-size:14px;padding:8px;line-height:24px;}
