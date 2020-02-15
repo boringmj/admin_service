@@ -42,14 +42,14 @@ else
             $return_content=file_get_contents($template_path);
             //绑定模板变量
             $content_array=array(
-                "\${title}"=>htmlspecialchars($result_sql_temp['title']),
-                "\${content}"=>htmlspecialchars($result_sql_temp['content']),
+                "\${title}"=>$Safety->xss($result_sql_temp['title']),
+                "\${content}"=>$Safety->xss($result_sql_temp['content']),
                 "\${time_stamp}"=>$result_sql_temp['time_stamp'],
                 "\${watch_number}"=>$watch_number,
                 "\${reward_number}"=>$result_sql_temp['reward_number'],
                 "\${like_number}"=>$result_sql_temp['like_number'],
                 "\${uuid}"=>$result_sql_temp['uuid'],
-                "\${nickname}"=>$result_sql_temp['nickname'],
+                "\${nickname}"=>$Safety->xss($result_sql_temp['nickname']),
                 "\${tid}"=>$result_sql_temp['tid'],
                 "\${restatus}"=>$result_sql_temp['restatus'],
                 "\${organization}"=>$main_config['organization_config']['name'],

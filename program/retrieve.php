@@ -35,7 +35,7 @@ if(isset($result_sql_temp['user'])&&$result_sql_temp['time_stamp'])
                 $content_array=array(
                     "\${public}"=>$main_config['html_config']['public'],
                     "\${uuid}"=>$_GET['uuid'],
-                    "\${user}"=>$result_sql_temp['user'],
+                    "\${user}"=>$Safety->xss($result_sql_temp['user']),
                     "\${nickname_len_min}"=>$main_config['user_info']['nickname_len_min'],
                     "\${nickname_len_max}"=>$main_config['user_info']['nickname_len_max'],
                     "\${passwd_len_min}"=>$main_config['user_info']['passwd_len_min'],

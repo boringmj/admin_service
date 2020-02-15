@@ -19,7 +19,7 @@ $content_array=array(
     "\${maxCreateCount}"=>$main_config['admin_config']['create_max'],
     "\${getCreateCountMonth}"=>$Admin->getCreateCountMonth(),
     "\${maxCreateCountMonth}"=>$main_config['admin_config']['create_month_max'],
-    "\${user_name}"=>$User->user_info['name']
+    "\${user_name}"=>$Safety->xss($User->user_info['name'])
 );
 foreach($content_array as $key=>$value)
 {

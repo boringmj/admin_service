@@ -58,7 +58,7 @@ if($User->getUserInfo()&&$_SESSION['uuid']===$_COOKIE['uuid'])
             "\${public}"=>$main_config['html_config']['public'],
             "\${name}"=>$main_config['organization_config']['name'],
             "\${development}"=>$main_config['organization_config']['development'],
-            "\${value}"=>isset($_GET['value'])?$_GET['value']:'',
+            "\${value}"=>isset($_GET['value'])?$Safety->value_url($_GET['value']):'',
             "{\$}"=>'$'
         );
         foreach($content_array as $key=>$value)

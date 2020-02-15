@@ -7,6 +7,7 @@ date_default_timezone_set('PRC');
 include_once 'config/main.php';
 include_class('Database');
 include_class('Encryption');
+include_class('Safety');
 
 //预定义变量
 $Database;
@@ -112,6 +113,8 @@ if(!$result['exit'])
 
     //实例化加密类
     $Encryption=new Encryption();
+    //实例化安全类
+    $Safety=new Safety();
 }
 
 function include_php($path)
@@ -120,6 +123,7 @@ function include_php($path)
     global $main_config;
     global $Database;
     global $Encryption;
+    global $Safety;
     global $_FILES;
     $path.='.php';
     $result_code=1000;
@@ -144,6 +148,7 @@ function include_program($path)
     global $main_config;
     global $Database;
     global $Encryption;
+    global $Safety;
     global $_FILES;
     $path='program/'.$path.'.php';
     $result_code=1003;
@@ -188,6 +193,7 @@ function include_data($path)
     global $main_config;
     global $Database;
     global $Encryption;
+    global $Safety;
     global $_FILES;
     $path='data/'.$path.'.php';
     $result_code=1008;
