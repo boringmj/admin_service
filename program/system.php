@@ -7,7 +7,7 @@ if(empty($_POST['app_id']))
     $_POST['app_id']="";
 if(getPermission($_POST['app_id'],'system_api')==='Y')
 {
-    if(!empty($_GET['mode'])&&!preg_match('/(.*m.*a.*i.*n.*|.*\..*)/',$_GET['mode']))
+    if(!empty($_GET['mode'])&&!preg_match('/.*\..*/',$_GET['mode']))
     {
         $path='./program/system/'.$_GET['mode'].'.php';
         if(is_file($path))

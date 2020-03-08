@@ -7,7 +7,7 @@ if(empty($_POST['app_id']))
     $_POST['app_id']="";
 if(getPermission($_POST['app_id'],'application_api')==='Y')
 {
-    if(!empty($_GET['mode'])&&!preg_match('/(.*main.*|.*\..*)/',$_GET['mode']))
+    if(!empty($_GET['mode'])&&!preg_match('/.*\..*/',$_GET['mode']))
     {
         $path='./program/application/'.$_GET['mode'].'.php';
         if(is_file($path))
@@ -20,7 +20,7 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
             if(empty($app_key))
             {
                 //匹配不到就返回正常的json
-                $result['mode']=3;
+                $result['mode']=1;
                 $result_code=1013;
                 $result_content='非法请求';
                 $result['array']['application']=array(

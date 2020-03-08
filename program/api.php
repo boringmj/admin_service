@@ -2,7 +2,7 @@
 
 #program/api
 
-if(!empty($_GET['mode'])&&!preg_match('/(.*m.*a.*i.*n.*|.*\..*)/',$_GET['mode']))
+if(!empty($_GET['mode'])&&!preg_match('/.*\..*/',$_GET['mode']))
 {
     $path='./program/api/'.$_GET['mode'].'.php';
     if(is_file($path))
