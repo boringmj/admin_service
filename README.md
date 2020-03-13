@@ -1,5 +1,8 @@
 # admin_service
 一个后台管理项目
+
+本项目开发者:无聊的莫稽(wuliaodemoji@wuliaomj.com)
+
 如果有BUG请加QQ3239957605给我反馈哟
 
 QQ在线咨询(不能保证我能收到您发送成功的消息)
