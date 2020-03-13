@@ -235,8 +235,9 @@ class Admin
                     {
                         //直接改变当前状态,不验证是否成功
                         $table_name=$this->database_object->getTablename('admin_application');
-                        $sql_statement=$this->database_object->object->prepare("UPDATE {$table_name} SET api_states=:api_states WHERE uuid=:uuid");
+                        $sql_statement=$this->database_object->object->prepare("UPDATE {$table_name} SET api_states=:api_states WHERE uuid=:uuid AND api_id=:api_id");
                         $sql_statement->bindParam(':api_states',$states);
+                        $sql_statement->bindParam(':api_id',$api_id);
                         $sql_statement->bindParam(':uuid',$this->uuid);
                         $sql_statement->execute();
                         $this->api_info['api_states']=$states;
