@@ -310,6 +310,64 @@ class Admin
             return 0;
         }
     }
+
+    //通过余额续费应用
+    public function renewApi($api_id,$day)
+    {
+        if($this->checkUser())
+        {
+            if($this->checkApi($api_id))
+            {
+                //处理传入的天数,小于1视为1,抛弃小数
+                settype($day,"int");
+                if($day<1)
+                    $day=1;
+                $money=$this->admin_config['renew_balance']*$day;
+                if($this->setBalance(-$money)!=-1)
+                {
+                    //计算过期时间
+                    $expired_time_stamp=$this->api_info['expired_time_stamp']+$day*24*60*60;
+                    //更新过期时间,不验证是否成功
+                    $table_name=$this->database_object->getTablename('admin_application');
+                    $sql_statement=$this->database_object->object->prepare("UPDATE {$table_name} SET expired_time_stamp=:expired_time_stamp WHERE uuid=:uuid AND api_id=:api_id");
+                    $sql_statement->bindParam(':expired_time_stamp',$expired_time_stamp);
+                    $sql_statement->bindParam(':api_id',$api_id);
+                    $sql_statement->bindParam(':uuid',$this->uuid);
+                    $sql_statement->execute();
+                    //这里实时更新一下应用状态,续费后时间超过10分钟就更新为正常
+                    if($expired_time_stamp>time()+10*60)
+                    {
+                        //直接改变当前状态,不验证是否成功
+                        $table_name=$this->database_object->getTablename('admin_application');
+                        $sql_statement=$this->database_object->object->prepare("UPDATE {$table_name} SET api_states='Y' WHERE uuid=:uuid AND api_id=:api_id");
+                        $sql_statement->bindParam(':api_id',$api_id);
+                        $sql_statement->bindParam(':uuid',$this->uuid);
+                        $sql_statement->execute();
+                        $this->api_info['api_states']='Y';
+                    }
+                    $this->api_info['expired_time_stamp']=$expired_time_stamp;
+                    return 1;
+                }
+                else
+                {
+                    $this->error_info['renewApi']=$this->error_info['setBalance'];
+                    return 0;
+                }
+            }
+            else
+            {
+                $this->error_info['renewApi']=$this->error_info['checkApi'];
+                return 0;
+            }
+        }
+        else
+        {
+            //出现错误返回0
+            $this->error_info['renewApi']=$this->error_info['checkUser'];
+            return 0;
+        }
+    }
+
 }
 
 ?>

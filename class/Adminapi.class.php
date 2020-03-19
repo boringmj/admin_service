@@ -9,7 +9,7 @@ class Adminapi
     public $admin_config=array();       //后台配置信息
 
     //系统回馈参数(系统一般不直接返回结果,需要回馈参数中自行查找,大多回馈参数出于提高效率而存在的,不可直接访问)
-    public $api_info=array();        //查询到的api_id对应的信息(至少需要调用一次checkApi()才会有数据)
+    public $api_info=array();           //查询到的api_id对应的信息(至少需要调用一次checkApi()才会有数据)
     public $error_info=array();         //错误信息
 
 
