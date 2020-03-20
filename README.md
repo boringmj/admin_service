@@ -18,7 +18,7 @@
 2. 安装项目所需扩展,您可以参考`admin_service/main.php`检测的所有扩展
 3. 给予指定目录或文件可写权限,您可以参考`admin_service/program/install.php`检测的所有可写目录或文件,如不存在请自行补充
 4. 关闭除`admin_service/public`目录和`admin_service/index.php`的web访问权限(别忘记重启服务哟)
-5. 配置`admin_service`目录下的所有文件
+5. 配置`admin_service/config`目录下的所有文件
 6. 通过浏览器访问`admin_service/index.php`即可
 
 温馨小提示:
