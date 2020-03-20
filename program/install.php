@@ -8,7 +8,7 @@ $paths=array(
 );
 
 //最新版本
-$install_data_new=12;
+$install_data_new=13;
 
 foreach($paths as $path)
 {
@@ -367,6 +367,20 @@ function install_tables($Database,$install_data_path,$install_data_new,$install_
             $table_name=$Database->getTablename('admin_application');
             $sql_statement=$Database->object->prepare("ALTER TABLE {$table_name} 
                 ADD api_states VARCHAR(1) DEFAULT 'Y'
+            ");
+            echo $sql_statement->execute()?"{$table_name}数据表新增字段成功<br>":"";
+        }
+        $install_data_code=13;
+        if($install_data->code<$install_data_code)
+        {
+            $table_name=$Database->getTablename('admin_application');
+            $sql_statement=$Database->object->prepare("ALTER TABLE {$table_name} 
+                ADD ap_user_register_states VARCHAR(1) DEFAULT 'Y',
+                ADD ap_user_max INT(2) DEFAULT 18,
+                ADD ap_user_min INT(2) DEFAULT 6,
+                ADD ap_sign_states VARCHAR(1) DEFAULT 'N',
+                ADD ap_email_states VARCHAR(1) DEFAULT 'N',
+                ADD ap_email_verification_states VARCHAR(1) DEFAULT 'N'
             ");
             echo $sql_statement->execute()?"{$table_name}数据表新增字段成功<br>":"";
         }
