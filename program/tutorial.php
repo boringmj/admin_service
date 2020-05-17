@@ -40,6 +40,8 @@ else
         if(is_file($template_path))
         {
             $return_content=file_get_contents($template_path);
+            //定义一个动态的“\\n”字符,避免出现bug(因为功能还未测试,可能存在bug)
+            $br_string="\${br$server_time_stamp}";
             //绑定模板变量
             $content_array=array(
                 "\${title}"=>$Safety->xss($result_sql_temp['title']),
@@ -53,7 +55,10 @@ else
                 "\${tid}"=>$result_sql_temp['tid'],
                 "\${restatus}"=>$result_sql_temp['restatus'],
                 "\${organization}"=>$main_config['organization_config']['name'],
-                "\n"=>"<br>"
+                "\\n"=>$br_string,
+                "\n"=>"<br>",
+                $br_string=>"\n"
+                
             );
             foreach($content_array as $key=>$value)
             {

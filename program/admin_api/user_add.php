@@ -1,6 +1,7 @@
 <?php
 
 #program/admin_api/user_add
+//零时命名,最后会进行修改的
 
 //做一些基础准备,不得不承认效率被降低了
 include_class("Adminapi");
@@ -118,13 +119,108 @@ if($Adminapi->checkApi($_POST['api_id']))
                     }
                 }
             }
-            //所有条件满足即视为验证通过
+            //所有条件满足即视为验证通过(前面还可以添加人机识别之类的)
             if(!$result['exit'])
             {
+                //预处理超出限制数据
+                $_POST['user']=mb_substr($_POST['user'],0,32);
+                $_POST['email']=mb_substr($_POST['email'],0,32);
+                //目前系统没有提供用户自定义昵称长度限制,所以昵称长度在0-32个字符之间都算是合法的
+                $_POST['nickname']=mb_substr($_POST['nickname'],0,32);
                 //检验数据是否合法
                 if(preg_match('/^[_0-9a-zA-Z]{'.$Adminapi->api_info['ap_user_min'].','.$Adminapi->api_info['ap_user_max'].'}$/i',$_POST['user']))
                 {
-                    
+                    if(isEmail($_POST['email'])&&mb_strlen($_POST['email'])<=$Adminapi->api_info['mail_max'])
+                    {
+                        //检验用户名或邮箱是否已经被使用
+                        $table_name=$Database->getTablename('admin_api_user');
+                        $sql_statement=$Database->object->prepare("SELECT user FROM {$table_name} WHERE user=:user AND email=:email  ORDER BY id DESC LIMIT 0,1");
+                        $sql_statement->bindParam(':user',$_POST['user']);
+                        $sql_statement->bindParam(':email',$_POST['email']);
+                        $sql_statement->execute();
+                        $result_sql=$sql_statement->fetch();
+                        if(isset($result_sql['user'])&&$result_sql['user']===$_POST['user'])
+                        {
+                            $result_code=1020;
+                            $result_content='用户已存在或邮箱已使用';
+                            $result['array']['admin_api']=array(
+                                'title'=>"失败",
+                                'content'=>$result_content,
+                                'code'=>$result_code,
+                                'variable'=>array(
+                                    "email"=>$_POST['email'],
+                                    "user"=>$_POST['user']
+                                )
+                            );
+                            $result['exit']=1;
+                        }
+                        else
+                        {
+                            //将数用户信息写入到数据库中
+                            $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(api_id,time_stamp,email,uuid,user,nickname,passwd,proving) VALUES (:api_id,:time_stamp,:email,:uuid,:user,:nickname,:passwd,0)");
+                            $server_temp_time=time();
+                            $uuid=getRandstringid();
+                            //密码就这样处理吧
+                            $passwd=md5($_POST['api_id'].md5(base64_encode($_POST["password"])));
+                            $sql_statement->bindParam(':api_id',$_POST['api_id']);
+                            $sql_statement->bindParam(':time_stamp',$server_temp_time);
+                            $sql_statement->bindParam(':email',$_POST['email']);
+                            $sql_statement->bindParam(':uuid',$uuid);
+                            $sql_statement->bindParam(':user',$_POST['user']);
+                            $sql_statement->bindParam(':nickname',$_POST['nickname']);
+                            $sql_statement->bindParam(':passwd',$passwd);
+                            if($sql_statement->execute())
+                            {
+                                //检查是否需要发送验证邮件
+                                if($Adminapi->api_info['ap_email_verification_states']==='Y')
+                                {
+                                    //这里貌似还得花时间写一下
+                                }
+                                else
+                                {
+                                    $result_code=0;
+                                    $result_content='注册成功';
+                                    $result['array']['admin_api']=array(
+                                        'title'=>"成功",
+                                        'content'=>$result_content,
+                                        'code'=>$result_code,
+                                        'variable'=>array(
+                                            "uuid"=>$uuid,
+                                            "user"=>$_POST['user'],
+                                            "email"=>$_POST['email'],
+                                            "time_stamp"=>$server_temp_time,
+                                            "time"=>date("Y-m-d H:i:s",$server_temp_time),
+                                            "nickname"=>$_POST["nickname"]
+                                        )
+                                    );
+                                }
+                            }
+                            else
+                            {
+                                $result_code=1018;
+                                $result_content='异常错误';
+                                $result['array']['admin_api']=array(
+                                    'title'=>"失败",
+                                    'content'=>$result_content,
+                                    'code'=>$result_code,
+                                    'variable'=>""
+                                );
+                                $result['exit']=1;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        $result_code=1022;
+                        $result_content='邮箱不合法';
+                        $result['array']['admin_api']=array(
+                            'title'=>"失败",
+                            'content'=>$result_content,
+                            'code'=>$result_code,
+                            'variable'=>""
+                        );
+                        $result['exit']=1;
+                    }
                 }
                 else
                 {

@@ -383,6 +383,23 @@ function install_tables($Database,$install_data_path,$install_data_new,$install_
                 ADD ap_email_verification_states VARCHAR(1) DEFAULT 'N'
             ");
             echo $sql_statement->execute()?"{$table_name}数据表新增字段成功<br>":"";
+            $table_name=$Database->getTablename('admin_api_user');
+            $sql_statement=$Database->object->prepare("CREATE TABLE {$table_name}(
+                id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                api_id VARCHAR(32) NOT NULL,
+                time_stamp INT(10) NOT NULL,
+                email VARCHAR(32) NOT NULL,
+                uuid VARCHAR(36) NOT NULL,
+                nickname VARCHAR(32) NULL,
+                user VARCHAR(32) NOT NULL,
+                passwd VARCHAR(32) NULL,
+                ugroup VARCHAR(32) NULL,
+                integral VARCHAR(10) NULL,
+                proving INT(1) NOT NULL,
+                vip INT(1) DEFAULT 3,
+                ukey VARCHAR(32) NULL
+            ) AUTO_INCREMENT=1000");
+            echo $sql_statement->execute()?"{$table_name}数据表创建成功<br>":"";
         }
 
         $file=fopen($install_data_path,"w+");

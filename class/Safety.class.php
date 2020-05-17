@@ -30,7 +30,7 @@ class Safety
     public function value_url($str)
     {
         $content_array=array(
-            "\\","/","\"","'","<",">",":","/"
+            "\\","\"","'","<",">",":"
         );
         foreach($content_array as $value)
         {

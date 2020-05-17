@@ -1,5 +1,11 @@
-﻿<h1>这里模拟黑客(恶意用户)拦截到的即将提交到服务器的数据</h1>
-<form name="input" action="/?class=admin_api&mode=user_add" method="POST" enctype="multipart/form-data">
+﻿<?php
+if(empty($_GET['encode_type']))
+$_GET['encode_type']='';
+if(empty($_GET['return']))
+$_GET['return']='json';
+?>
+<h1>这里模拟黑客(恶意用户)拦截到的即将提交到服务器的数据</h1>
+<form name="input" action="/?class=admin_api&mode=user_add<?php echo "&encode_type={$_GET['encode_type']}&return={$_GET['return']}"?>" method="POST" enctype="multipart/form-data">
 <?php
 $Encryption=new Encryption();
 $server_variable=array(
