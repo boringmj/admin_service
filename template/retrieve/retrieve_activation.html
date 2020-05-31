@@ -87,7 +87,7 @@
             $.ajax({
                 type: "POST",
                 dataType: "json",
-                url: "/?class=retrieve&mode=activation&uuid=${uuid}",
+                url: "/?class=retrieve&mode=activation&uuid=${uuid}&reid=${reid}",
                 data: data.field,
                 success: function (result){
                     console.log(result);
@@ -99,7 +99,7 @@
                         closeCurrentPage();
                     }else
                     {
-                        layer.msg(result.register.content);
+                        layer.msg(result.retrieve.content);
                         layer.closeAll('loading');
                     }
                 },

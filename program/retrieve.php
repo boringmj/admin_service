@@ -15,12 +15,13 @@ $table_name=$Database->getTablename('temporary_retrieve_user');
 //删除过期的用户数据
 $sql_statement=$Database->object->prepare("DELETE FROM {$table_name} WHERE time_stamp<".(time()-7*24*60*60));
 $sql_statement->execute();
+//查询当前申请用户
 $sql_statement=$Database->object->prepare("SELECT user,time_stamp FROM {$table_name} WHERE uuid=:uuid AND reid=:reid ORDER BY id DESC LIMIT 0,1");
 $sql_statement->bindParam(':uuid',$_GET['uuid']);
 $sql_statement->bindParam(':reid',$_GET['reid']);
 $sql_statement->execute();
 $result_sql_temp=$sql_statement->fetch();
-if(isset($result_sql_temp['user'])&&$result_sql_temp['time_stamp'])
+if(isset($result_sql_temp['user']))
 {
     if($server_time_stamp<$result_sql_temp['time_stamp']+7*24*60*60)
     {
@@ -36,6 +37,7 @@ if(isset($result_sql_temp['user'])&&$result_sql_temp['time_stamp'])
                     "\${public}"=>$main_config['html_config']['public'],
                     "\${uuid}"=>$_GET['uuid'],
                     "\${user}"=>$Safety->xss($result_sql_temp['user']),
+                    "\${reid}"=>$_GET['reid'],
                     "\${nickname_len_min}"=>$main_config['user_info']['nickname_len_min'],
                     "\${nickname_len_max}"=>$main_config['user_info']['nickname_len_max'],
                     "\${passwd_len_min}"=>$main_config['user_info']['passwd_len_min'],
