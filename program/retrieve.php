@@ -90,7 +90,7 @@ if(isset($result_sql_temp['user']))
                     {
                         $table_name=$Database->getTablename('user');
                         $passwd=md5($main_config['user_info']['start_salt'].$passwd.$main_config['user_info']['end_salt']);
-                        $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET passwd=:passwd WHERE uuid=:uuid AND proving=0");
+                        $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET passwd=:passwd WHERE uuid=:uuid AND proving=1");
                         $sql_statement->bindParam(':passwd',$passwd);
                         $sql_statement->bindParam(':uuid',$_GET['uuid']);
                         if($sql_statement->execute())
