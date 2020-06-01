@@ -8,7 +8,7 @@ $paths=array(
 );
 
 //最新版本
-$install_data_new=13;
+$install_data_new=14;
 
 foreach($paths as $path)
 {
@@ -399,6 +399,24 @@ function install_tables($Database,$install_data_path,$install_data_new,$install_
             vip INT(1) DEFAULT 3,
             ukey VARCHAR(32) NULL
         ) AUTO_INCREMENT=1000");
+        echo $sql_statement->execute()?"{$table_name}数据表创建成功<br>":"";
+    }
+    $install_data_code=14;
+    if($install_data->code<$install_data_code)
+    {
+        $table_name=$Database->getTablename('admin_application');
+        $sql_statement=$Database->object->prepare("ALTER TABLE {$table_name} 
+            ADD ap_user_login_states VARCHAR(1) DEFAULT 'Y'
+        ");
+        echo $sql_statement->execute()?"{$table_name}数据表新增字段成功<br>":"";
+        $table_name=$Database->getTablename('admin_api_temporary_login');
+        $sql_statement=$Database->object->prepare("CREATE TABLE {$table_name}(
+            id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            api_id VARCHAR(32) NOT NULL,
+            time_stamp INT(10) NOT NULL,
+            uuid VARCHAR(36) NOT NULL,
+            ukey VARCHAR(32) NULL
+        )");
         echo $sql_statement->execute()?"{$table_name}数据表创建成功<br>":"";
     }
 

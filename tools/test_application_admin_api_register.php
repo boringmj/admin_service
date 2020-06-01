@@ -5,11 +5,11 @@ if(empty($_GET['return']))
 $_GET['return']='json';
 ?>
 <h1>这里模拟黑客(恶意用户)拦截到的即将提交到服务器的数据</h1>
-<form name="input" action="/?class=admin_api&mode=user_add<?php echo "&encode_type={$_GET['encode_type']}&return={$_GET['return']}"?>" method="POST" enctype="multipart/form-data">
+<form name="input" action="/?class=admin_api&mode=register<?php echo "&encode_type={$_GET['encode_type']}&return={$_GET['return']}"?>" method="POST" enctype="multipart/form-data">
 <?php
 $Encryption=new Encryption();
 $server_variable=array(
-    'api_id'=>"1581442252K97QnNTXBfpwU2gvV9QwqT",
+    'api_id'=>"15910148037Us6Fmu4aUL8S4rIHXsALO",
     'nonce'=>"1008611",
     'time'=>"",
     'time_stamp'=>time(),
@@ -27,11 +27,11 @@ foreach($server_variable as $key=>$value)
     //echo "{$key}=>{$value}<br>";
     echo "{$key}<input type=\"text\" name=\"{$key}\" value=\"$value\"><br>";
 }
-$server_sign_temp=$server_sign.'&api_key=kIgcqfTKhlHVGQ22mHNobDnwDwjpH2filJqH';
+$server_sign_temp=$server_sign.'&api_key=ZNQWOtREgH1JnWKXLGcAe2p5OVISdUG4m9B1';
 $server_sign_temp=md5($server_sign_temp);
 echo "[POST]sign<input type=\"text\" name=\"sign\" value=\"{$server_sign_temp}\"><br>";
 //$server_sign.="&sign={$server_sign_temp}";
-//$s=$Encryption->encodeIum($server_sign,"kIgcqfTKhlHVGQ22mHNobDnwDwjpH2filJqH");
+//$s=$Encryption->encodeIum($server_sign,"ZNQWOtREgH1JnWKXLGcAe2p5OVISdUG4m9B1");
 //echo "sign=>{$server_sign_temp}<br>";
 //echo "s原值=>{$server_sign}<br>";
 //echo "s<input type=\"text\" name=\"s\" value=\"{$s}\"><br>";
