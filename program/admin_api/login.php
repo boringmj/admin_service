@@ -131,7 +131,6 @@ if($Adminapi->checkApi($_POST['api_id']))
                 $result_sql=$sql_statement->fetch();
                 if(isset($result_sql['user'])&&$result_sql['user']===$_POST['user'])
                 {
-                    $doroko;
                     //验证用户状态是否正常,0为为验证邮箱,1为正常用户
                     if(($result_sql['proving']=="0"&&$Adminapi->api_info['ap_email_verification_states']==='N')||$result_sql['proving']=="1")
                     {
