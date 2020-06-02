@@ -393,8 +393,8 @@ function install_tables($Database,$install_data_path,$install_data_new,$install_
             nickname VARCHAR(32) NULL,
             user VARCHAR(32) NOT NULL,
             passwd VARCHAR(32) NULL,
-            ugroup VARCHAR(32) NULL,
-            integral VARCHAR(10) NULL,
+            ugroup VARCHAR(32) DEFAULT 0,
+            integral VARCHAR(10) DEFAULT 0,
             proving INT(1) NOT NULL,
             vip INT(1) DEFAULT 3,
             ukey VARCHAR(32) NULL

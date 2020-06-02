@@ -1,22 +1,24 @@
 <?php
 
-#program/admin_api/register
+#program/admin_api/user_info
 
 //做一些基础准备,不得不承认效率被降低了
 include_class("Adminapi");
 $Adminapi=new Adminapi();
 $Adminapi->database_object=$Database;
 $Adminapi->admin_config=$main_config['admin_config'];
+//预定义基础变量方便存储其他数据
+$user_info=array();
 //检查接口是否处于正常可用状态
 if($Adminapi->checkApi($_POST['api_id']))
 {
     if($Adminapi->api_info['user_count']<$Adminapi->api_info['user_max'])
     {
         //注册接口是否已经开启
-        if($Adminapi->api_info['ap_user_register_states']==='Y')
+        if($Adminapi->api_info['ap_user_login_states']==='Y')
         {
             //检验基础参数是否已经传入
-            if(empty($_POST['user'])||empty($_POST['nickname'])||empty($_POST['email'])||empty($_POST['password']))
+            if(empty($_POST['uuid'])||empty($_POST['ukey']))
             {
                 $result_code=1011;
                 $result_content='必要参数为空';
@@ -65,10 +67,8 @@ if($Adminapi->checkApi($_POST['api_id']))
                                 'nonce'=>$_POST['nonce'],
                                 'time'=>$_POST['time'],
                                 'time_stamp'=>$_POST['time_stamp'],
-                                'user'=>$_POST['user'],
-                                'nickname'=>$_POST['nickname'],
-                                'email'=>$_POST['email'],
-                                'password'=>$_POST['password']
+                                'uuid'=>$_POST['uuid'],
+                                'ukey'=>$_POST['ukey']
                             );
                             $server_sign='';
                             foreach($server_variable as $key=>$value)
@@ -121,108 +121,47 @@ if($Adminapi->checkApi($_POST['api_id']))
             //所有条件满足即视为验证通过(前面还可以添加人机识别之类的)
             if(!$result['exit'])
             {
-                //预处理超出限制数据
-                $_POST['user']=mb_substr($_POST['user'],0,32);
-                $_POST['email']=mb_substr($_POST['email'],0,32);
-                //目前系统没有提供用户自定义昵称长度限制,所以昵称长度在0-32个字符之间都算是合法的
-                $_POST['nickname']=mb_substr($_POST['nickname'],0,32);
-                //检验数据是否合法
-                if(preg_match('/^[_0-9a-zA-Z]{'.$Adminapi->api_info['ap_user_min'].','.$Adminapi->api_info['ap_user_max'].'}$/i',$_POST['user']))
+                //验证uuid是否和ukey匹配
+                $table_name=$Database->getTablename('admin_api_temporary_login');
+                $sql_statement=$Database->object->prepare("SELECT time_stamp,uuid FROM {$table_name} WHERE uuid=:uuid AND ukey=:ukey AND api_id=:api_id ORDER BY id DESC LIMIT 0,1");
+                $sql_statement->bindParam(':uuid',$_POST['uuid']);
+                $sql_statement->bindParam(':ukey',$_POST['ukey']);
+                $sql_statement->bindParam(':api_id',$_POST['api_id']);
+                $sql_statement->execute();
+                $result_sql=$sql_statement->fetch();
+                if(isset($result_sql['uuid'])&&$result_sql['uuid']===$_POST['uuid'])
                 {
-                    if(isEmail($_POST['email'])&&mb_strlen($_POST['email'])<=$Adminapi->api_info['mail_max'])
+                    //先验证是否过期再考虑获取用户信息
+                    if($result_sql['time_stamp']>=time()-30*24*60*60)
                     {
-                        //检验用户名或邮箱是否已经被使用
                         $table_name=$Database->getTablename('admin_api_user');
-                        $sql_statement=$Database->object->prepare("SELECT user FROM {$table_name} WHERE user=:user AND email=:email  ORDER BY id DESC LIMIT 0,1");
-                        $sql_statement->bindParam(':user',$_POST['user']);
-                        $sql_statement->bindParam(':email',$_POST['email']);
+                        $sql_statement=$Database->object->prepare("SELECT user,uuid,nickname,proving,integral,ugroup,vip FROM {$table_name} WHERE uuid=:uuid AND api_id=:api_id ORDER BY id DESC LIMIT 0,1");
+                        $sql_statement->bindParam(':uuid',$_POST['uuid']);
+                        $sql_statement->bindParam(':api_id',$_POST['api_id']);
                         $sql_statement->execute();
-                        $result_sql=$sql_statement->fetch();
-                        if(isset($result_sql['user'])&&$result_sql['user']===$_POST['user'])
+                        $result_sql=$sql_statement->fetch(PDO::FETCH_ASSOC);
+                        if(!empty($result_sql['user'])&&(($result_sql['proving']=="0"&&$Adminapi->api_info['ap_email_verification_states']==='N')||$result_sql['proving']=="1"))
                         {
-                            $result_code=1020;
-                            $result_content='用户已存在或邮箱已使用';
+                            //有绑定用户且用户状态正常即算验证通过,并传递信息
+                            $user_info=$result_sql;
+                        }
+                        else
+                        {
+                            $result_code=99994;
+                            $result_content='异常错误';
                             $result['array']['admin_api']=array(
                                 'title'=>"失败",
                                 'content'=>$result_content,
                                 'code'=>$result_code,
-                                'variable'=>array(
-                                    "email"=>$_POST['email'],
-                                    "user"=>$_POST['user']
-                                )
+                                'variable'=>""
                             );
                             $result['exit']=1;
-                        }
-                        else
-                        {
-                            //将用户信息写入到数据库中
-                            $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(api_id,time_stamp,email,uuid,user,nickname,passwd,proving) VALUES (:api_id,:time_stamp,:email,:uuid,:user,:nickname,:passwd,0)");
-                            $server_temp_time=time();
-                            $uuid=getRandstringid();
-                            //密码就这样处理吧
-                            $passwd=md5($_POST['api_id'].md5(base64_encode($_POST["password"])));
-                            $sql_statement->bindParam(':api_id',$_POST['api_id']);
-                            $sql_statement->bindParam(':time_stamp',$server_temp_time);
-                            $sql_statement->bindParam(':email',$_POST['email']);
-                            $sql_statement->bindParam(':uuid',$uuid);
-                            $sql_statement->bindParam(':user',$_POST['user']);
-                            $sql_statement->bindParam(':nickname',$_POST['nickname']);
-                            $sql_statement->bindParam(':passwd',$passwd);
-                            if($sql_statement->execute())
-                            {
-                                //检查是否需要发送验证邮件(请不要强行开启发送邮件)
-                                if($Adminapi->api_info['ap_email_verification_states']==='Y')
-                                {
-                                    //这里貌似还得花时间写一下
-                                    //出于其他目的这里需要精心设计过
-                                }
-                                else
-                                {
-                                    $result_code=0;
-                                    $result_content='注册成功';
-                                    $result['array']['admin_api']=array(
-                                        'title'=>"成功",
-                                        'content'=>$result_content,
-                                        'code'=>$result_code,
-                                        'variable'=>array(
-                                            "uuid"=>$uuid,
-                                            "user"=>$_POST['user'],
-                                            "email"=>$_POST['email'],
-                                            "time_stamp"=>$server_temp_time,
-                                            "time"=>date("Y-m-d H:i:s",$server_temp_time),
-                                            "nickname"=>$_POST["nickname"]
-                                        )
-                                    );
-                                }
-                                if(!$result['exit'])
-                                {
-                                    //没有出现错误就记录一次用户注册成功(也就是消耗一次注册机会)
-                                    $table_name=$Database->getTablename('admin_application');
-                                    $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET user_count=:user_count WHERE api_id=:api_id");
-                                    $sql_statement->bindParam(':api_id',$_POST['api_id']);
-                                    $user_count=$Adminapi->api_info['user_count']+1;
-                                    $sql_statement->bindParam(':user_count',$user_count);
-                                    $sql_statement->execute();
-                                }
-                            }
-                            else
-                            {
-                                $result_code=1018;
-                                $result_content='异常错误';
-                                $result['array']['admin_api']=array(
-                                    'title'=>"失败",
-                                    'content'=>$result_content,
-                                    'code'=>$result_code,
-                                    'variable'=>""
-                                );
-                                $result['exit']=1;
-                            }
                         }
                     }
                     else
                     {
-                        $result_code=1022;
-                        $result_content='邮箱不合法';
+                        $result_code=99995;
+                        $result_content='令牌已过期';
                         $result['array']['admin_api']=array(
                             'title'=>"失败",
                             'content'=>$result_content,
@@ -234,8 +173,8 @@ if($Adminapi->checkApi($_POST['api_id']))
                 }
                 else
                 {
-                    $result_code=1021;
-                    $result_content='用户不合法';
+                    $result_code=99996;
+                    $result_content='无效的令牌';
                     $result['array']['admin_api']=array(
                         'title'=>"失败",
                         'content'=>$result_content,
@@ -244,6 +183,19 @@ if($Adminapi->checkApi($_POST['api_id']))
                     );
                     $result['exit']=1;
                 }
+            }
+            //没有出现错误即视为通过鉴权验证
+            if(!$result['exit'])
+            {
+                //这样写主要是给以后留轮子
+                $result_code=0;
+                $result_content='获取成功';
+                $result['array']['admin_api']=array(
+                    'title'=>"成功",
+                    'content'=>$result_content,
+                    'code'=>$result_code,
+                    'variable'=>$user_info
+                );
             }
         }
         else
