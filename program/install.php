@@ -29,7 +29,8 @@ if(!is_file($install_data_path)&&$result['exit']===0)
         $result['html']="您还未完成安装本程序,点击<a href='/?mode=y'>安装数据信息</a>完成安装";
         $result['mode']=2;
         $result['exit']=1;
-    }else
+    }
+    else
     {
         install_tables($Database,$install_data_path,$install_data_new,1);
         $result['html']="数据信息安装完成";
