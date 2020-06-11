@@ -419,6 +419,23 @@ function install_tables($Database,$install_data_path,$install_data_new,$install_
             ukey VARCHAR(32) NULL
         )");
         echo $sql_statement->execute()?"{$table_name}数据表创建成功<br>":"";
+        $table_name=$Database->getTablename('admin_api_user');
+        $sql_statement=$Database->object->prepare("ALTER TABLE {$table_name} 
+            ADD head_portrait VARCHAR(36) NULL
+        ");
+        echo $sql_statement->execute()?"{$table_name}数据表新增字段成功<br>":"";
+        $table_name=$Database->getTablename('admin_api_upload_file');
+        $sql_statement=$Database->object->prepare("CREATE TABLE {$table_name}(
+            id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            api_id VARCHAR(32) NOT NULL,
+            time_stamp INT(10) NOT NULL,
+            uuid VARCHAR(36) NOT NULL,
+            flid VARCHAR(36) NOT NULL,
+            file_path VARCHAR(32) NOT NULL,
+            file_type VARCHAR(8) NOT NULL,
+            file_size INT(16) NOT NULL
+        )");
+        echo $sql_statement->execute()?"{$table_name}数据表创建成功<br>":"";
     }
 
     $file=fopen($install_data_path,"w+");

@@ -1,6 +1,6 @@
 <?php
 
-#program/admin_api/user_info
+#program/admin_api/user_head
 
 //做一些基础准备,不得不承认效率被降低了
 include_class("Adminapi");
@@ -18,7 +18,7 @@ if($Adminapi->checkApi($_POST['api_id']))
         if($Adminapi->api_info['ap_user_login_states']==='Y')
         {
             //检验基础参数是否已经传入
-            if(empty($_POST['uuid'])||empty($_POST['ukey']))
+            if(empty($_POST['uuid'])||empty($_POST['ukey'])||empty($_POST['qq']))
             {
                 $result_code=1011;
                 $result_content='必要参数为空';
@@ -68,7 +68,8 @@ if($Adminapi->checkApi($_POST['api_id']))
                                 'time'=>$_POST['time'],
                                 'time_stamp'=>$_POST['time_stamp'],
                                 'uuid'=>$_POST['uuid'],
-                                'ukey'=>$_POST['ukey']
+                                'ukey'=>$_POST['ukey'],
+                                'qq'=>$_POST['qq']
                             );
                             $server_sign='';
                             foreach($server_variable as $key=>$value)
@@ -187,31 +188,51 @@ if($Adminapi->checkApi($_POST['api_id']))
             //没有出现错误即视为通过鉴权验证
             if(!$result['exit'])
             {
-                if(empty($user_info['head_portrait']))
+                //预处理超出限制数据
+                $_POST['qq']=mb_substr($_POST['qq'],0,32);
+                if(preg_match('/^[0-9]{5,24}$/i',$_POST['qq']))
                 {
-                    //直接使用默认头像
-                    $user_info['head_portrait']=$main_config['admin_config']['user_head']['default'];
+                    $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET head_portrait=:head_portrait WHERE uuid=:uuid AND api_id=:api_id");
+                    $sql_statement->bindParam(':head_portrait',$_POST['qq']);
+                    $sql_statement->bindParam(':api_id',$_POST['api_id']);
+                    $sql_statement->bindParam(':uuid',$_POST['uuid']);
+                    if($sql_statement->execute())
+                    {
+                        $result_code=0;
+                        $result_content='头像修改成功';
+                        $result['array']['admin_api']=array(
+                            'title'=>"成功",
+                            'content'=>$result_content,
+                            'code'=>$result_code,
+                            'variable'=>""
+                        );
+                        $result['exit']=1;
+                    }
+                    else
+                    {
+                        $result_code=99997;
+                        $result_content='系统异常';
+                        $result['array']['admin_api']=array(
+                            'title'=>"失败",
+                            'content'=>$result_content,
+                            'code'=>$result_code,
+                            'variable'=>""
+                        );
+                        $result['exit']=1;
+                    }
                 }
-                $default_content=$main_config['admin_config']['user_head']['url'];
-                $content_array=array(
-                    "\${head_portrait}"=>$user_info['head_portrait'],
-                    "{\$}"=>'$'
-                );
-                foreach($content_array as $key=>$value)
+                else
                 {
-                    $default_content=str_replace($key,$value,$default_content);
+                    $result_code=99992;
+                    $result_content='无效的用户QQ';
+                    $result['array']['admin_api']=array(
+                        'title'=>"失败",
+                        'content'=>$result_content,
+                        'code'=>$result_code,
+                        'variable'=>""
+                    );
+                    $result['exit']=1;
                 }
-                //这里重写返回的属性
-                $user_info['head_portrait']=$default_content;
-                //返回数据
-                $result_code=0;
-                $result_content='获取成功';
-                $result['array']['admin_api']=array(
-                    'title'=>"成功",
-                    'content'=>$result_content,
-                    'code'=>$result_code,
-                    'variable'=>$user_info
-                );
             }
         }
         else

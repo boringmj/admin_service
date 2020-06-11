@@ -23,6 +23,8 @@ if($Adminapi->checkApi($_POST['api_id']))
         );
         $result['exit']=1;
     }
+    //为了安全着想这里会强制签名
+    $Adminapi->api_info['ap_sign_states']='Y';
     //检验是否需要签名
     if(!$result['exit']&&$Adminapi->api_info['ap_sign_states']==='Y')
     {
