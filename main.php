@@ -86,6 +86,16 @@ if(!function_exists('curl_close'))
     );
     $result['exit']=1;
 }
+if(!function_exists('session_start'))
+{
+    $result['array'][]=array(
+        'title'=>"失败",
+        'content'=>"当前环境不支持SESSION",
+        'code'=>995,
+        'variable'=>""
+    );
+    $result['exit']=1;
+}
 
 //基础环境正常
 if(!$result['exit'])
