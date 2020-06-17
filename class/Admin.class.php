@@ -5,18 +5,20 @@
 class Admin
 {
     //必要参数(目前没有提供函数设置)
-    public $database_object;            //数据库对象
-    public $app_id="";                  //开发者app_id
-    public $uuid="";                    //用户唯一标识,uuid
-    public $admin_config=array();       //后台配置信息
+    public $database_object;                //数据库对象
+    public $app_id="";                      //开发者app_id
+    public $uuid="";                        //用户唯一标识,uuid
+    public $admin_config=array();           //后台配置信息
 
     //系统回馈参数(系统一般不直接返回结果,需要回馈参数中自行查找,大多回馈参数出于提高效率而存在的,不可直接访问)
-    protected $balance=0;               //用户余额(需调用方法返回)
-    protected $time_stamp=0;            //开通时间(不可返回)
-    protected $admin_info=array();      //后台信息
-    protected $create_admin_count=0;    //已开通的后台个数(需要先调用getCreateCount()后才可访问)
-    protected $api_info=array();        //查询到的api_id对应的信息(至少需要调用一次checkApi()才会有数据)
-    public $error_info=array();         //错误信息
+    protected $balance=0;                   //用户余额(需调用方法返回)
+    protected $time_stamp=0;                //开通时间(不可返回)
+    protected $admin_info=array();          //后台信息
+    protected $create_admin_count=0;        //已开通的后台个数(需要先调用getCreateCount()后才可访问)
+    protected $create_user_library_count=0; //已经创建的用户库数量(需要先调用getCreateCountUserLibrary()后才可以访问)
+    protected $user_library_info=array();   //用户库的信息
+    protected $api_info=array();            //查询到的api_id对应的信息(至少需要调用一次checkApi()才会有数据)
+    public $error_info=array();             //错误信息
 
     //检查用户数据是否已经存在,不存在补充用户数据
     protected function checkUser()
@@ -364,6 +366,148 @@ class Admin
         {
             //出现错误返回0
             $this->error_info['renewApi']=$this->error_info['checkUser'];
+            return 0;
+        }
+    }
+
+    //检查用户库是否为当前用户所有
+    public function checkUserLibrary($span_id)
+    {
+        if($this->checkUser())
+        {
+            $table_name=$this->database_object->getTablename('admin_api_user_library');
+            $sql_statement=$this->database_object->object->prepare("SELECT * FROM {$table_name} WHERE uuid=:uuid AND span_id=:span_id ORDER BY id DESC LIMIT 0,1");
+            $sql_statement->bindParam(':uuid',$this->uuid);
+            $sql_statement->bindParam(':span_id',$span_id);
+            $sql_statement->execute();
+            $result_sql_temp=$sql_statement->fetch(PDO::FETCH_ASSOC);
+            if(isset($result_sql_temp['uuid'])&&$result_sql_temp['uuid']===$this->uuid)
+            {
+                $this->user_library_info=$result_sql_temp;
+                return 1;
+            }
+            else
+            {
+                $this->error_info['checkUserLibrary']=array(
+                    'code'=>1071,
+                    'title'=>"失败",
+                    'content'=>"非法请求",
+                    'variable'=>''
+                );
+                return 0;
+            }
+        }
+        else
+        {
+            //出现错误返回0
+            $this->error_info['checkUserLibrary']=$this->error_info['checkUser'];
+            return 0;
+        }
+    }
+
+    //获取已经创建的用户库的个数,出现错误返回-1
+    public function getCreateCountUserLibrary()
+    {
+        if($this->checkUser())
+        {
+            $table_name=$this->database_object->getTablename('admin_api_user_library');
+            $sql_statement=$this->database_object->object->prepare("SELECT time_stamp,uuid FROM {$table_name} WHERE uuid=:uuid");
+            $sql_statement->bindParam(':uuid',$this->uuid);
+            $sql_statement->execute();
+            $this->create_user_library_count=count($sql_statement->fetchAll(PDO::FETCH_ASSOC));
+            return $this->create_user_library_count;
+        }
+        else
+        {
+            //出现错误返回-1
+            $this->error_info['getCreateCountUserLibrary']=$this->error_info['checkUser'];
+            return -1;
+        }
+    }
+
+    //获取用户库的信息
+    public function getUserLibraryInfo($span_id)
+    {
+        if($this->checkUser())
+        {
+            //检查是否已经存在缓存信息(主要是节约资源避免二次调用)
+            if(isset($this->user_library_info['span_id'])&&$this->user_library_info['span_id']===$span_id)
+            {
+                return $this->user_library_info;
+            }
+            else
+            {
+                //没有调用过就获取
+                if($this->checkUserLibrary($span_id))
+                {
+                    return $this->user_library_info;
+                }
+                else
+                {
+                    $this->error_info['getUserLibraryInfo']=$this->error_info['checkUserLibrary'];
+                    return 0;
+                }
+            }
+        }
+        else
+        {
+            //出现错误返回0
+            $this->error_info['getUserLibraryInfo']=$this->error_info['checkUser'];
+            return 0;
+        }
+    }
+
+    //免费续费用户库
+    public function renewUserLibrary($span_id)
+    {
+        if($this->checkUser())
+        {
+            if($this->checkUserLibrary($span_id))
+            {
+                if($this->getUserLibraryInfo($span_id))
+                {
+                    //计算当前用户库是否在允许续费的时间内(30天内即可再次续费)
+                    if($this->user_library_info['expired_time_stamp']<=time()+30*24*60*60)
+                    {
+                        //计算过期时间
+                        $expired_time_stamp=$this->user_library_info['expired_time_stamp']+30*24*60*60;
+                        //更新过期时间,不验证是否成功
+                        $table_name=$this->database_object->getTablename('admin_api_user_library');
+                        $sql_statement=$this->database_object->object->prepare("UPDATE {$table_name} SET expired_time_stamp=:expired_time_stamp WHERE uuid=:uuid AND span_id=:span_id");
+                        $sql_statement->bindParam(':expired_time_stamp',$expired_time_stamp);
+                        $sql_statement->bindParam(':span_id',$span_id);
+                        $sql_statement->bindParam(':uuid',$this->uuid);
+                        $sql_statement->execute();
+                        $this->user_library_info['expired_time_stamp']=$expired_time_stamp;
+                        return 1;
+                    }
+                    else
+                    {
+                        $this->error_info['renewUserLibrary']=array(
+                            'code'=>1073,
+                            'title'=>"失败",
+                            'content'=>"续费失败",
+                            'variable'=>''
+                        );
+                        return 0;
+                    }
+                }
+                else
+                {
+                    $this->error_info['renewUserLibrary']=$this->error_info['getUserLibraryInfo'];
+                    return 0;
+                }
+            }
+            else
+            {
+                $this->error_info['renewUserLibrary']=$this->error_info['checkUserLibrary'];
+                return 0;
+            }
+        }
+        else
+        {
+            //出现错误返回0
+            $this->error_info['renewUserLibrary']=$this->error_info['checkUser'];
             return 0;
         }
     }

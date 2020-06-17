@@ -398,7 +398,8 @@ function install_tables($Database,$install_data_path,$install_data_new,$install_
             integral VARCHAR(10) DEFAULT 0,
             proving INT(1) NOT NULL,
             vip INT(1) DEFAULT 3,
-            ukey VARCHAR(32) NULL
+            ukey VARCHAR(32) NULL,
+            span_id VARCHAR(32) NOT NULL
         ) AUTO_INCREMENT=1000");
         echo $sql_statement->execute()?"{$table_name}数据表创建成功<br>":"";
     }
@@ -434,6 +435,22 @@ function install_tables($Database,$install_data_path,$install_data_new,$install_
             file_path VARCHAR(32) NOT NULL,
             file_type VARCHAR(8) NOT NULL,
             file_size INT(16) NOT NULL
+        )");
+        echo $sql_statement->execute()?"{$table_name}数据表创建成功<br>":"";
+        $table_name=$Database->getTablename('admin_application');
+        $sql_statement=$Database->object->prepare("ALTER TABLE {$table_name} 
+            ADD user_library VARCHAR(32) NULL
+        ");
+        echo $sql_statement->execute()?"{$table_name}数据表新增字段成功<br>":"";
+        $table_name=$Database->getTablename('admin_api_user_library');
+        $sql_statement=$Database->object->prepare("CREATE TABLE {$table_name}(
+            id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            time_stamp INT(10) NOT NULL,
+            expired_time_stamp VARCHAR(10) NOT NULL,
+            span_id VARCHAR(32) NOT NULL,
+            span_name VARCHAR(16) NOT NULL,
+            uuid VARCHAR(32) NOT NULL,
+            app_id VARCHAR(32) NOT NULL
         )");
         echo $sql_statement->execute()?"{$table_name}数据表创建成功<br>":"";
     }

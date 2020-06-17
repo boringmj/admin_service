@@ -2,6 +2,8 @@
 
 #program/admin_api/admin_user_del
 
+#目前该接口用于删除登录的用户自身
+
 //做一些基础准备,不得不承认效率被降低了
 include_class("Adminapi");
 $Adminapi=new Adminapi();
@@ -126,9 +128,10 @@ if($Adminapi->checkApi($_POST['api_id']))
         if(isset($result_sql['user'])&&$result_sql['user']===$_POST['user'])
         {
             //用户存在,那么直接执行删除操作
-            $sql_statement=$Database->object->prepare("DELETE FROM {$table_name} WHERE api_id=:api_id AND uuid=:uuid");
+            $sql_statement=$Database->object->prepare("DELETE FROM {$table_name} WHERE api_id=:api_id AND uuid=:uuid AND span_id=:span_id");
             $sql_statement->bindParam(':api_id',$_POST['api_id']);
             $sql_statement->bindParam(':uuid',$result_sql['uuid']);
+            $sql_statement->bindParam(':span_id',$Adminapi->api_info['user_library']);
             if($sql_statement->execute())
             {
                 $result_code=0;

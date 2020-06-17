@@ -123,10 +123,11 @@ if($Adminapi->checkApi($_POST['api_id']))
                 $_POST['user']=mb_substr($_POST['user'],0,32);
                 //用户登录事件处理
                 $table_name=$Database->getTablename('admin_api_user');
-                $sql_statement=$Database->object->prepare("SELECT user,uuid,nickname,proving FROM {$table_name} WHERE user=:user AND passwd=:passwd ORDER BY id DESC LIMIT 0,1");
+                $sql_statement=$Database->object->prepare("SELECT user,uuid,nickname,proving FROM {$table_name} WHERE user=:user AND passwd=:passwd AND span_id=:span_id ORDER BY id DESC LIMIT 0,1");
                 $passwd=md5($_POST['api_id'].md5(base64_encode($_POST["password"])));
                 $sql_statement->bindParam(':user',$_POST['user']);
                 $sql_statement->bindParam(':passwd',$passwd);
+                $sql_statement->bindParam(':span_id',$Adminapi->api_info['user_library']);
                 $sql_statement->execute();
                 $result_sql=$sql_statement->fetch();
                 if(isset($result_sql['user'])&&$result_sql['user']===$_POST['user'])

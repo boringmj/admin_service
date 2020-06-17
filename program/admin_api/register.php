@@ -133,9 +133,10 @@ if($Adminapi->checkApi($_POST['api_id']))
                     {
                         //检验用户名或邮箱是否已经被使用
                         $table_name=$Database->getTablename('admin_api_user');
-                        $sql_statement=$Database->object->prepare("SELECT user FROM {$table_name} WHERE user=:user AND email=:email  ORDER BY id DESC LIMIT 0,1");
+                        $sql_statement=$Database->object->prepare("SELECT user FROM {$table_name} WHERE user=:user AND email=:email AND span_id=:span_id  ORDER BY id DESC LIMIT 0,1");
                         $sql_statement->bindParam(':user',$_POST['user']);
                         $sql_statement->bindParam(':email',$_POST['email']);
+                        $sql_statement->bindParam(':span_id',$Adminapi->api_info['user_library']);
                         $sql_statement->execute();
                         $result_sql=$sql_statement->fetch();
                         if(isset($result_sql['user'])&&$result_sql['user']===$_POST['user'])
@@ -156,7 +157,7 @@ if($Adminapi->checkApi($_POST['api_id']))
                         else
                         {
                             //将用户信息写入到数据库中
-                            $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(api_id,time_stamp,email,uuid,user,nickname,passwd,proving) VALUES (:api_id,:time_stamp,:email,:uuid,:user,:nickname,:passwd,0)");
+                            $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(api_id,time_stamp,email,uuid,user,nickname,passwd,span_id,proving) VALUES (:api_id,:time_stamp,:email,:uuid,:user,:nickname,:passwd,:span_id,0)");
                             $server_temp_time=time();
                             $uuid=getRandstringid();
                             //密码就这样处理吧
@@ -168,6 +169,7 @@ if($Adminapi->checkApi($_POST['api_id']))
                             $sql_statement->bindParam(':user',$_POST['user']);
                             $sql_statement->bindParam(':nickname',$_POST['nickname']);
                             $sql_statement->bindParam(':passwd',$passwd);
+                            $sql_statement->bindParam(':span_id',$Adminapi->api_info['user_library']);
                             if($sql_statement->execute())
                             {
                                 //检查是否需要发送验证邮件(请不要强行开启发送邮件)

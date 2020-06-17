@@ -1,6 +1,6 @@
 <?php
 
-#program/application/admin_application
+#program/application/admin_application_user_ibrary
 
 //引入User类文件
 include_class("User");
@@ -63,7 +63,7 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                 {
                     if($_GET['from']==='create')
                     {
-                        if(empty($_POST['uuid'])||empty($_POST['ukey'])||empty($_POST['application_name'])||empty($_POST['application_note']))
+                        if(empty($_POST['uuid'])||empty($_POST['ukey'])||empty($_POST['span_name']))
                         {
                             $result_code=1011;
                             $result_content='必要参数为空';
@@ -87,8 +87,7 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                 'time_stamp'=>$_POST['time_stamp'],
                                 'uuid'=>$_POST['uuid'],
                                 'ukey'=>$_POST['ukey'],
-                                'application_name'=>$_POST['application_name'],
-                                'application_note'=>$_POST['application_note']
+                                'span_name'=>$_POST['span_name']
                             );
                             $server_sign='';
                             foreach($server_variable as $key=>$value)
@@ -119,79 +118,43 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                 if($User->user_info['get'])
                                 {
                                     $create_count=$Admin->getCreateCount();
-                                    if($create_count!=-1&&$create_count<$main_config['admin_config']['create_max'])
+                                    $create_user_library_count=$Admin->getCreateCountUserLibrary();
+                                    if($create_user_library_count!=-1&&$create_count!=-1&&$create_user_library_count<$create_count+1)
                                     {
-                                        $create_count_month=$Admin->getCreateCountMonth();
-                                        if($create_count_month!=-1&&$create_count_month<$main_config['admin_config']['create_month_max'])
+                                        //处理用户提交的数据
+                                        $_POST['span_name']=mb_substr($_POST['span_name'],0,16);
+                                        //写入创建的应用数据
+                                        $table_name=$Database->getTablename('admin_api_user_library');
+                                        $flid=getRandstringid();
+                                        $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(time_stamp,expired_time_stamp,span_id,span_name,uuid,app_id) VALUES (:time_stamp,:expired_time_stamp,:span_id,:span_name,:uuid,:app_id)");
+                                        $expired_time_stamp=$server_time_stamp+30*24*60*60;
+                                        $span_id=time().getRandomstring(22);
+                                        $sql_statement->bindParam(':time_stamp',$server_time_stamp);
+                                        $sql_statement->bindParam(':expired_time_stamp',$expired_time_stamp);
+                                        $sql_statement->bindParam(':span_id',$span_id);
+                                        $sql_statement->bindParam(':span_name',$_POST['span_name']);
+                                        $sql_statement->bindParam(':uuid',$_POST['uuid']);
+                                        $sql_statement->bindParam(':app_id',$_POST['app_id']);
+                                        if($sql_statement->execute())
                                         {
-                                            if($Admin->setBalance(-$main_config['admin_config']['create_balance'])!=-1)
-                                            {
-                                                //处理用户提交的数据
-                                                $_POST['application_name']=mb_substr($_POST['application_name'],0,16);
-                                                $_POST['application_note']=mb_substr($_POST['application_note'],0,64);
-                                                //写入创建的应用数据
-                                                $table_name=$Database->getTablename('admin_application');
-                                                $flid=getRandstringid();
-                                                $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(time_stamp,uuid,user_count,user_max,views_count,mail_count,mail_max,file_count,file_max,expired_time_stamp,apid,ap_title,ap_content,application_name,application_note,api_id,api_key,app_id) VALUES (:time_stamp,:uuid,0,:user_max,0,0,:mail_max,0,:file_max,:expired_time_stamp,'','','',:application_name,:application_note,:api_id,:api_key,:app_id)");
-                                                $expired_time_stamp=$server_time_stamp+$main_config['admin_config']['create_time'];
-                                                $api_id=time().getRandomstring(22);
-                                                $api_key=getRandomstring(36);
-                                                $sql_statement->bindParam(':time_stamp',$server_time_stamp);
-                                                $sql_statement->bindParam(':uuid',$_POST['uuid']);
-                                                $sql_statement->bindParam(':user_max',$main_config['admin_config']['application']['user_max']);
-                                                $sql_statement->bindParam(':mail_max',$main_config['admin_config']['application']['mail_max']);
-                                                $sql_statement->bindParam(':file_max',$main_config['admin_config']['application']['file_max']);
-                                                $sql_statement->bindParam(':expired_time_stamp',$expired_time_stamp);
-                                                $sql_statement->bindParam(':application_name',$_POST['application_name']);
-                                                $sql_statement->bindParam(':application_note',$_POST['application_note']);
-                                                $sql_statement->bindParam(':api_id',$api_id);
-                                                $sql_statement->bindParam(':api_key',$api_key);
-                                                $sql_statement->bindParam(':app_id',$_POST['app_id']);
-                                                if($sql_statement->execute())
-                                                {
-                                                    //创建成功就记一次本月创建应用,不验证成功
-                                                    $table_name=$Database->getTablename('admin_user');
-                                                    $create_count_month+=1;
-                                                    $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET create_count=:create_count WHERE uuid=:uuid");
-                                                    $sql_statement->bindParam(':create_count',$create_count_month);
-                                                    $sql_statement->bindParam(':uuid',$_POST['uuid']);
-                                                    $sql_statement->execute();
-                                                    $result_code=0;
-                                                    $result_content='已成功创建应用';
-                                                    $result['array']['application']=array(
-                                                        'title'=>"成功",
-                                                        'content'=>$result_content,
-                                                        'code'=>$result_code,
-                                                        'variable'=>array(
-                                                            'uuid'=>$_POST['uuid'],
-                                                            'api_id'=>$api_id,
-                                                            'api_key'=>$api_key
-                                                        )
-                                                    );
-                                                }
-                                                else
-                                                {
-                                                    $result_code=1018;
-                                                    $result_content='异常错误';
-                                                    $result['array']['application']=array(
-                                                        'title'=>"失败",
-                                                        'content'=>$result_content,
-                                                        'code'=>$result_code,
-                                                        'variable'=>''
-                                                    );
-                                                    $result['exit']=1;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                $result['array']['application']=$Admin->error_info['setBalance'];
-                                                $result['exit']=1;
-                                            }
+                                            //创建成功
+                                            $result_code=0;
+                                            $result_content='已成功创建用户库';
+                                            $result['array']['application']=array(
+                                                'title'=>"成功",
+                                                'content'=>$result_content,
+                                                'code'=>$result_code,
+                                                'variable'=>array(
+                                                    'uuid'=>$_POST['uuid'],
+                                                    'span_id'=>$span_id,
+                                                    'span_name'=>$_POST['span_name']
+                                                )
+                                            );
                                         }
                                         else
                                         {
-                                            $result_code=1061;
-                                            $result_content='当月创建总量已达上限';
+                                            $result_code=1018;
+                                            $result_content='异常错误';
                                             $result['array']['application']=array(
                                                 'title'=>"失败",
                                                 'content'=>$result_content,
@@ -203,7 +166,7 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                     }
                                     else
                                     {
-                                        $result_code=1060;
+                                        $result_code=1072;
                                         $result_content='创建总量已达上限';
                                         $result['array']['application']=array(
                                             'title'=>"失败",
@@ -295,27 +258,24 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                 //验证用户是否登录成功
                                 if($User->user_info['get'])
                                 {
-                                    $create_count=$Admin->getCreateCount();
-                                    $create_count_month=$Admin->getCreateCountMonth();
+                                    $create_count=$Admin->getCreateCountUserLibrary();
                                     //获取数据信息
                                     $limit=($_POST['page']-1)*10;
-                                    $table_name=$Database->getTablename('admin_application');
-                                    $sql_statement=$Database->object->prepare("SELECT time_stamp,uuid,application_name,api_states,application_note,user_count,user_max,views_count,mail_count,mail_max,file_count,file_max,expired_time_stamp,api_id,api_key FROM {$table_name} WHERE uuid=:uuid ORDER BY id DESC LIMIT {$limit},10");
+                                    $table_name=$Database->getTablename('admin_api_user_library');
+                                    $sql_statement=$Database->object->prepare("SELECT time_stamp,expired_time_stamp,span_id,span_name,app_id FROM {$table_name} WHERE uuid=:uuid ORDER BY id DESC LIMIT {$limit},20");
                                     $sql_statement->bindParam(':uuid',$_POST['uuid']);
                                     $sql_statement->execute();
                                     $temp_return_data=$sql_statement->fetchAll(PDO::FETCH_ASSOC);
                                     $result_code=0;
-                                    $result_content='获取应用列表成功';
+                                    $result_content='获取用户库列表成功';
                                     $result['array']['application']=array(
                                         'title'=>"成功",
                                         'content'=>$result_content,
                                         'code'=>$result_code,
                                         'variable'=>array(
                                             'count'=>$create_count,
-                                            'maxCreateCount'=>$main_config['admin_config']['create_max'],
-                                            'CreateCountMonth'=>$create_count_month+1-1,
-                                            'maxCreateCountMonth'=>$main_config['admin_config']['create_month_max'],
-                                            'page'=>ceil($create_count/10),
+                                            'maxCreateCount'=>$Admin->getCreateCount()+1,
+                                            'page'=>ceil($create_count/20),
                                             'date'=>$temp_return_data
                                         )
                                     );
@@ -342,7 +302,7 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                     }
                     else if($_GET['from']==='info')
                     {
-                        if(empty($_POST['uuid'])||empty($_POST['ukey'])||empty($_POST['api_id']))
+                        if(empty($_POST['uuid'])||empty($_POST['ukey'])||empty($_POST['span_id']))
                         {
                             $result_code=1011;
                             $result_content='必要参数为空';
@@ -366,7 +326,7 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                 'time_stamp'=>$_POST['time_stamp'],
                                 'uuid'=>$_POST['uuid'],
                                 'ukey'=>$_POST['ukey'],
-                                'api_id'=>$_POST['api_id']
+                                'span_id'=>$_POST['span_id']
                             );
                             $server_sign='';
                             foreach($server_variable as $key=>$value)
@@ -397,117 +357,22 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                 if($User->user_info['get'])
                                 {
                                     //获取信息并直接返回
-                                    $api_info=$Admin->getApiInfo($_POST['api_id']);
-                                    if($api_info)
+                                    $user_library_info=$Admin->getUserLibraryInfo($_POST['span_id']);
+                                    if($user_library_info)
                                     {
+                                        $user_library_info['expired_time']=date("Y-m-d H:i:s",$user_library_info['expired_time_stamp']);
                                         $result_code=0;
                                         $result_content='获取应用信息成功';
                                         $result['array']['application']=array(
                                             'title'=>"成功",
                                             'content'=>$result_content,
                                             'code'=>$result_code,
-                                            'variable'=>$api_info
+                                            'variable'=>$user_library_info
                                         );
                                     }
                                     else
                                     {
-                                        $result['array']['application']=$Admin->error_info['getApiInfo'];
-                                        $result['exit']=1;
-                                    }
-                                }
-                                else
-                                {
-                                    $result['array']['application']=$User->error_info['getUserInfo'];
-                                    $result['exit']=1;
-                                }
-                            }
-                            else
-                            {
-                                $result_code=1014;
-                                $result_content='非法请求';
-                                $result['array']['application']=array(
-                                    'title'=>"失败",
-                                    'content'=>$result_content,
-                                    'code'=>$result_code,
-                                    'variable'=>$_POST['sign']
-                                );
-                                $result['exit']=1;
-                            }
-                        }
-                    }
-                    else if($_GET['from']==='states')
-                    {
-                        if(empty($_POST['uuid'])||empty($_POST['ukey'])||empty($_POST['api_id'])||empty($_POST['states']))
-                        {
-                            $result_code=1011;
-                            $result_content='必要参数为空';
-                            $result['array']['application']=array(
-                                'title'=>"失败",
-                                'content'=>$result_content,
-                                'code'=>$result_code,
-                                'variable'=>""
-                            );
-                            $result['exit']=1;
-                        }
-                        else
-                        {
-                            //states环境下参数正常时执行
-                            //states签名
-                            $server_variable=array(
-                                'from'=>$_GET['from'],
-                                'app_id'=>$_POST['app_id'],
-                                'nonce'=>$_POST['nonce'],
-                                'time'=>$_POST['time'],
-                                'time_stamp'=>$_POST['time_stamp'],
-                                'uuid'=>$_POST['uuid'],
-                                'ukey'=>$_POST['ukey'],
-                                'api_id'=>$_POST['api_id'],
-                                'states'=>$_POST['states']
-                            );
-                            $server_sign='';
-                            foreach($server_variable as $key=>$value)
-                            {
-                                $server_sign.=$server_sign?"&{$key}=".getSignString($value):"{$key}=".getSignString($value);
-                            }
-                            $app_key=getAppkey($_POST['app_id']);
-                            $server_sign.='&app_key='.getSignString($app_key);
-                            $server_sign=md5($server_sign);
-                            if($server_sign===$_POST['sign'])
-                            {
-                                //states签名通过
-                                //取当前时间戳
-                                $server_time_stamp=time();
-                                //设置必要参数
-                                $User->app_id=$_POST['app_id'];
-                                $User->database_object=$Database;
-                                $Admin->app_id=$_POST['app_id'];
-                                $Admin->database_object=$Database;
-                                $Admin->uuid=$_POST['uuid'];
-                                $Admin->admin_config=$main_config['admin_config'];
-                                //设置uuid和ukey
-                                $User->setUuid($_POST['uuid']);
-                                $User->setUkey($_POST['ukey']);
-                                //获取用户信息(直接判断是否登录无法验证用户是否处于激活状态)
-                                $User->getUserInfo();
-                                //验证用户是否登录成功
-                                if($User->user_info['get'])
-                                {
-                                    //获取设置状态
-                                    $api_info=$Admin->setApiStates($_POST['api_id'],$_POST['states']);
-                                    if($api_info)
-                                    {
-                                        $result_code=0;
-                                        $result_content='应用状态变更成功';
-                                        $result['array']['application']=array(
-                                            'title'=>"成功",
-                                            'content'=>$result_content,
-                                            'code'=>$result_code,
-                                            'variable'=>'应用状态已变更'
-                                        );
-                                    }
-                                    else
-                                    {
-                                        $result['array']['application']=$Admin->error_info['setApiStates'];
+                                        $result['array']['application']=$Admin->error_info['getUserLibraryInfo'];
                                         $result['exit']=1;
                                     }
                                 }
@@ -533,7 +398,7 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                     }
                     else if($_GET['from']==='renew')
                     {
-                        if(empty($_POST['uuid'])||empty($_POST['ukey'])||empty($_POST['api_id'])||empty($_POST['day']))
+                        if(empty($_POST['uuid'])||empty($_POST['ukey'])||empty($_POST['span_id']))
                         {
                             $result_code=1011;
                             $result_content='必要参数为空';
@@ -557,8 +422,7 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                 'time_stamp'=>$_POST['time_stamp'],
                                 'uuid'=>$_POST['uuid'],
                                 'ukey'=>$_POST['ukey'],
-                                'api_id'=>$_POST['api_id'],
-                                'day'=>$_POST['day']
+                                'span_id'=>$_POST['span_id'],
                             );
                             $server_sign='';
                             foreach($server_variable as $key=>$value)
@@ -589,144 +453,21 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                 if($User->user_info['get'])
                                 {
                                     //获取设置状态
-                                    $api_info=$Admin->renewApi($_POST['api_id'],$_POST['day']);
-                                    if($api_info)
+                                    $user_library_info=$Admin->renewUserLibrary($_POST['span_id']);
+                                    if($user_library_info)
                                     {
                                         $result_code=0;
-                                        $result_content='应用续费成功';
+                                        $result_content='用户库续费成功';
                                         $result['array']['application']=array(
                                             'title'=>"成功",
                                             'content'=>$result_content,
                                             'code'=>$result_code,
-                                            'variable'=>'应用已成功续费'
+                                            'variable'=>'用户库已成功续费'
                                         );
                                     }
                                     else
                                     {
-                                        $result['array']['application']=$Admin->error_info['renewApi'];
-                                        $result['exit']=1;
-                                    }
-                                }
-                                else
-                                {
-                                    $result['array']['application']=$User->error_info['getUserInfo'];
-                                    $result['exit']=1;
-                                }
-                            }
-                            else
-                            {
-                                $result_code=1014;
-                                $result_content='非法请求';
-                                $result['array']['application']=array(
-                                    'title'=>"失败",
-                                    'content'=>$result_content,
-                                    'code'=>$result_code,
-                                    'variable'=>$_POST['sign']
-                                );
-                                $result['exit']=1;
-                            }
-                        }
-                    }
-                    else if($_GET['from']==='bind')
-                    {
-                        if(empty($_POST['uuid'])||empty($_POST['ukey'])||empty($_POST['span_id'])||empty($_POST['api_id']))
-                        {
-                            $result_code=1011;
-                            $result_content='必要参数为空';
-                            $result['array']['application']=array(
-                                'title'=>"失败",
-                                'content'=>$result_content,
-                                'code'=>$result_code,
-                                'variable'=>""
-                            );
-                            $result['exit']=1;
-                        }
-                        else
-                        {
-                            //bind环境下参数正常时执行
-                            //bind签名
-                            $server_variable=array(
-                                'from'=>$_GET['from'],
-                                'app_id'=>$_POST['app_id'],
-                                'nonce'=>$_POST['nonce'],
-                                'time'=>$_POST['time'],
-                                'time_stamp'=>$_POST['time_stamp'],
-                                'uuid'=>$_POST['uuid'],
-                                'ukey'=>$_POST['ukey'],
-                                'api_id'=>$_POST['api_id'],
-                                'span_id'=>$_POST['span_id']
-                            );
-                            $server_sign='';
-                            foreach($server_variable as $key=>$value)
-                            {
-                                $server_sign.=$server_sign?"&{$key}=".getSignString($value):"{$key}=".getSignString($value);
-                            }
-                            $app_key=getAppkey($_POST['app_id']);
-                            $server_sign.='&app_key='.getSignString($app_key);
-                            $server_sign=md5($server_sign);
-                            if($server_sign===$_POST['sign'])
-                            {
-                                //bind签名通过
-                                //取当前时间戳
-                                $server_time_stamp=time();
-                                //设置必要参数
-                                $User->app_id=$_POST['app_id'];
-                                $User->database_object=$Database;
-                                $Admin->app_id=$_POST['app_id'];
-                                $Admin->database_object=$Database;
-                                $Admin->uuid=$_POST['uuid'];
-                                $Admin->admin_config=$main_config['admin_config'];
-                                //设置uuid和ukey
-                                $User->setUuid($_POST['uuid']);
-                                $User->setUkey($_POST['ukey']);
-                                //获取用户信息(直接判断是否登录无法验证用户是否处于激活状态)
-                                $User->getUserInfo();
-                                //验证用户是否登录成功
-                                if($User->user_info['get'])
-                                {
-                                    if($Admin->checkApi($_POST['api_id']))
-                                    {
-                                        if($Admin->checkUserLibrary($_POST['span_id']))
-                                        {
-                                            //进行绑定
-                                            $table_name=$Database->getTablename('admin_application');
-                                            $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET user_library=:user_library WHERE api_id=:api_id AND app_id=:app_id");
-                                            $sql_statement->bindParam(':user_library',$_POST['span_id']);
-                                            $sql_statement->bindParam(':api_id',$_POST['api_id']);
-                                            $sql_statement->bindParam(':app_id',$_POST['app_id']);
-                                            if($sql_statement->execute())
-                                            {
-                                                $result_code=0;
-                                                $result_content='绑定成功';
-                                                $result['array']['application']=array(
-                                                    'title'=>"成功",
-                                                    'content'=>$result_content,
-                                                    'code'=>$result_code,
-                                                    'variable'=>'应用已成功绑定用户库'
-                                                );
-                                            }
-                                            else
-                                            {
-                                                $result_code=1018;
-                                                $result_content='异常错误';
-                                                $result['array']['application']=array(
-                                                    'title'=>"失败",
-                                                    'content'=>$result_content,
-                                                    'code'=>$result_code,
-                                                    'variable'=>''
-                                                );
-                                                $result['exit']=1;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            $result['array']['application']=$Admin->error_info['checkUserLibrary'];
-                                            $result['exit']=1;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        $result['array']['application']=$Admin->error_info['checkApi'];
+                                        $result['array']['application']=$Admin->error_info['renewUserLibrary'];
                                         $result['exit']=1;
                                     }
                                 }

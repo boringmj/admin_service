@@ -136,9 +136,10 @@ if($Adminapi->checkApi($_POST['api_id']))
                     if($result_sql['time_stamp']>=time()-30*24*60*60)
                     {
                         $table_name=$Database->getTablename('admin_api_user');
-                        $sql_statement=$Database->object->prepare("SELECT user,uuid,nickname,proving,integral,ugroup,vip,head_portrait FROM {$table_name} WHERE uuid=:uuid AND api_id=:api_id ORDER BY id DESC LIMIT 0,1");
+                        $sql_statement=$Database->object->prepare("SELECT user,uuid,nickname,proving,integral,ugroup,vip,head_portrait FROM {$table_name} WHERE uuid=:uuid AND api_id=:api_id AND span_id=:span_id ORDER BY id DESC LIMIT 0,1");
                         $sql_statement->bindParam(':uuid',$_POST['uuid']);
                         $sql_statement->bindParam(':api_id',$_POST['api_id']);
+                        $sql_statement->bindParam(':span_id',$Adminapi->api_info['user_library']);
                         $sql_statement->execute();
                         $result_sql=$sql_statement->fetch(PDO::FETCH_ASSOC);
                         if(!empty($result_sql['user'])&&(($result_sql['proving']=="0"&&$Adminapi->api_info['ap_email_verification_states']==='N')||$result_sql['proving']=="1"))
@@ -192,10 +193,11 @@ if($Adminapi->checkApi($_POST['api_id']))
                 $_POST['qq']=mb_substr($_POST['qq'],0,32);
                 if(preg_match('/^[0-9]{5,24}$/i',$_POST['qq']))
                 {
-                    $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET head_portrait=:head_portrait WHERE uuid=:uuid AND api_id=:api_id");
+                    $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET head_portrait=:head_portrait WHERE uuid=:uuid AND api_id=:api_id AND span_id=:span_id");
                     $sql_statement->bindParam(':head_portrait',$_POST['qq']);
                     $sql_statement->bindParam(':api_id',$_POST['api_id']);
                     $sql_statement->bindParam(':uuid',$_POST['uuid']);
+                    $sql_statement->bindParam(':span_id',$Adminapi->api_info['user_library']);
                     if($sql_statement->execute())
                     {
                         $result_code=0;

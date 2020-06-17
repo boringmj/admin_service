@@ -81,4 +81,7 @@ foreach($result_sql_temp as $temp_data)
     }
 }
 
+//这里删除已经过期的用户库
+
+
 ?>

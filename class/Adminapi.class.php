@@ -25,6 +25,35 @@ class Adminapi
         $result_sql_temp=$sql_statement->fetch(PDO::FETCH_ASSOC);
         if(!empty($result_sql_temp['uuid']))
         {
+            //这里验证应用是否已经绑定用户库
+            if(empty($result_sql_temp['user_library']))
+            {
+                $this->error_info['checkApi']=array(
+                    'code'=>1069,
+                    'title'=>"失败",
+                    'content'=>"应用未绑定用户库",
+                    'variable'=>''
+                );
+                return 0;
+            }
+            //这里验证用户库是否还可用
+            $table_name=$this->database_object->getTablename('admin_api_user_library');
+            $sql_statement=$this->database_object->object->prepare("SELECT * FROM {$table_name} WHERE span_id=:span_id AND expired_time_stamp>:time_stamp ORDER BY id DESC LIMIT 0,1");
+            $sql_statement->bindParam(':span_id',$result_sql_temp['user_library']);
+            $sql_statement->bindParam(':time_stamp',$server_time_stamp);
+            $sql_statement->execute();
+            $result_sql_temp_user=$sql_statement->fetch(PDO::FETCH_ASSOC);
+            if(empty($result_sql_temp_user['span_id']))
+            {
+                $this->error_info['checkApi']=array(
+                    'code'=>1070,
+                    'title'=>"失败",
+                    'content'=>"绑定的用户库失效",
+                    'variable'=>''
+                );
+                return 0;
+            }
+
             $this->api_info=$result_sql_temp;
             return 1;
         }
