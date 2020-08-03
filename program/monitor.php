@@ -5,7 +5,7 @@
 /**
  * 监控说明
  *
- * 监控需要运营商通过任意方式任意频率访问,这里推荐每3分钟访问一次
+ * 监控需要运营商通过任意方式任意频率访问,这里推荐每3小时访问一次
  * 监控涉及异步更新和数据处理,这可能会加大服务器的负担 
  * 短时间内我不会更新监控的访问权限,所以需要用户自行鉴权
  * 这里会占用掉大部分服务器资源,而且单线程删除效率很低
@@ -124,7 +124,7 @@ foreach($result_sql_temp as $temp_data)
         "\${expired_time}"=>date("Y-m-d",$temp_data['expired_time_stamp']),
         "\${product_name}"=>"admin_service",
         "\${product_id}"=>$temp_data['id'],
-        "\${delete_time}"=>date("Y-m-d",$temp_data['expired_time_stamp']+7*24*60*60)
+        "\${delete_time}"=>date("Y-m-d",$temp_data['expired_time_stamp'])
     );
     $ret_mail=$Sendmail->send("过期删除提醒",$result_sql_temp_user_info['email'],"default/delete",$content_array);
     //因为特殊需要,无论邮件是否发送成功都会删除(不验证是否成功)
