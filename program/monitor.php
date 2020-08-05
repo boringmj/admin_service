@@ -17,6 +17,13 @@ include_once 'config/mail.php';
 //定义一些常用的公共变量
 $server_time_stamp=time();
 
+//这里做一个简单的鉴权处理
+if(!(isset($_GET["key"])&&md5($_GET['key'])==md5($main_config['system_config']['monitor_key'])))
+{
+    //因为懒,所以就这样
+    exit();
+}
+
 // @ 应用过期处理
 $table_name=$Database->getTablename('admin_application');
 $sql_statement=$Database->object->prepare("SELECT expired_time_stamp,uuid,id,api_id FROM {$table_name} WHERE expired_time_stamp<=:time_stamp AND (api_states='Y' OR api_states='N') ORDER BY id DESC");

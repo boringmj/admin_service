@@ -27,11 +27,11 @@
     *数据库仅支持mysql
 */
 $database_info=array(
-    'host'=>"localhost",    //地址
-    'user'=>"",             //用户
-    'passwd'=>"",           //密码
-    'database'=>"",         //库名
-    'prefix'=>""            //前缀(允许为空)
+    'host'      =>  "localhost",   //地址
+    'user'      =>  "",            //用户
+    'passwd'    =>  "",            //密码
+    'database'  =>  "",            //库名
+    'prefix'    =>  ""             //前缀(允许为空)
 );
 
 //用户配置信息
@@ -49,15 +49,15 @@ $database_info=array(
     
 */
 $user_info=array(
-    'user_len_min'=>6,      //用户名最低长度(推荐最低不超过6)
-    'user_len_max'=>18,     //用户名最大长度(最大不能超过32)
-    'email_len_max'=>32,    //邮箱最大长度(最大不能超过32)
-    'nickname_len_min'=>4,  //昵称最低长度(推荐4)
-    'nickname_len_max'=>32, //昵称最大长度(最大不能超过32,系统会丢弃超过32位的数据)
-    'passwd_len_min'=>6,    //密码最低长度
-    'passwd_len_max'=>32,   //密码最大长度
-    'start_salt'=>'',       //开头加盐(允许为空)(安装后不可修改)
-    'end_salt'=>''          //结尾加盐(允许为空)(安装后不可修改)
+    'user_len_min'      =>  6,     //用户名最低长度(推荐最低不超过6)
+    'user_len_max'      =>  18,    //用户名最大长度(最大不能超过32)
+    'email_len_max'     =>  32,    //邮箱最大长度(最大不能超过32)
+    'nickname_len_min'  =>  4,     //昵称最低长度(推荐4)
+    'nickname_len_max'  =>  32,    //昵称最大长度(最大不能超过32,系统会丢弃超过32位的数据)
+    'passwd_len_min'    =>  6,     //密码最低长度
+    'passwd_len_max'    =>  32,    //密码最大长度
+    'start_salt'        =>  '',    //开头加盐(允许为空)(安装后不可修改)
+    'end_salt'          =>  ''     //结尾加盐(允许为空)(安装后不可修改)
 );
 
 //html配置
@@ -76,11 +76,11 @@ $user_info=array(
         当域名含有端口号时,可访问域名(配置名称:request_domain)也需要跟上端口号
 */
 $html_config=array(
-    'domain'=>"",               //域名(可加上端口号)
-    'protocol'=>"http",         //请求协议
-    'public'=>"public",         //主要目录
-    'open_request_domain'=>1,   //开启域名访问限制(1开启,0关闭)
-    'request_domain'=>array()   //可访问域名(允许为空,请使用数组)
+    'domain'                =>  "",         //域名(可加上端口号)
+    'protocol'              =>  "http",     //请求协议
+    'public'                =>  "public",   //主要目录
+    'open_request_domain'   =>  1,          //开启域名访问限制(1开启,0关闭)
+    'request_domain'        =>  array()     //可访问域名(允许为空,请使用数组)
 );
 
 //项目配置
@@ -88,8 +88,8 @@ $html_config=array(
     *请保留以下信息
 */
 $organization_config=array(
-    'name'=>"后台管理",              //项目名称
-    'development'=>'无聊的莫稽'      //开发商(或开发者)
+    'name'          =>  "后台管理",       //项目名称
+    'development'   =>  '无聊的莫稽'      //开发组(或开发者)
 );
 
 //系统配置
@@ -97,7 +97,16 @@ $organization_config=array(
     *系统配置,不建议修改
 */
 $system_config=array(
-    'sign_code'=>"null"             //签名时使用的编码方式,目前仅支持“url”“base64”“null”,错误的值将会被认为是“null”,注:url请按php的urlencode()为准
+    'sign_code'     =>  "null",                          //签名时使用的编码方式,目前仅支持“url”“base64”“null”,错误的值将会被认为是“null”,注:url请按php的urlencode()为准
+    'monitor_key'   =>  "",                              //监控鉴权使用的key,用户需要自定义任意字符
+    'vaptcha'       =>  array(                           //该项需要用户前往 https://www.vaptcha.com 注册后获取相关信息
+        'verify'    =>  array(                           //人机验证单元信息
+            'url'   =>  "http://0.vaptcha.com/verify",   //二次验证地址
+            'vid'   =>  "",                              //VID(关闭后可为空)
+            'key'   =>  "",                              //KEY(关闭后可为空)
+            'open'  =>  0                                //开启验证(1开启,0关闭,关闭后您可以忽略VID和KEY,相对的您将会面临其他危险)
+        )
+    )
 );
 
 //后台管理配置
@@ -106,21 +115,21 @@ $system_config=array(
     *积分必须为整数
 */
 $admin_config=array(
-    'create_balance'=>0,            //创建应用需要花费的余额
-    'create_max'=>5,                //最多创建应用个数,负数为不可创建,0为无限制,正整数为限制个数
-    'create_time'=>30*24*60*60,     //创建应用过期时间(秒)
-    'create_month_max'=>10,         //每月最多可创建应用总个数,负数为不可创建,0为无限制,正整数为限制个数
-    'renew_balance'=>0.1,           //续费一天应用需要花费的余额(仅支持按天续费)
-    'integral_exchange'=>0.01,      //兑换率,单个积分可兑换余额数量
-    'application'=>array(
-        'user_max'=>300,            //初始注册用户上限(可正常登陆记为一次,用户被删除后重新注册记为两个用户)
-        'mail_max'=>500,            //初始邮件发送上限(发送成功记为一次,各种途径发送都将计算在内)
-        'file_max'=>10,             //初始文件创建上限(创建成功记为一次,文件删除后不恢复次数)
-        'file_size'=>1024*1024*3    //单个文件的上限,单位字节,不可超过3145728(1024*1024*3)字节(3MB),中文每个字节按照当前编码计算,一般为3字节‬
+    'create_balance'    =>  0,            //创建应用需要花费的余额
+    'create_max'        =>  5,            //最多创建应用个数,负数为不可创建,0为无限制,正整数为限制个数
+    'create_time'       =>  30*24*60*60,  //创建应用过期时间(秒)
+    'create_month_max'  =>  10,           //每月最多可创建应用总个数,负数为不可创建,0为无限制,正整数为限制个数
+    'renew_balance'     =>  0.1,          //续费一天应用需要花费的余额(仅支持按天续费)
+    'integral_exchange' =>  0.01,         //兑换率,单个积分可兑换余额数量
+    'application'       =>  array(
+        'user_max'      =>  300,          //初始注册用户上限(可正常登陆记为一次,用户被删除后重新注册记为两个用户)
+        'mail_max'      =>  500,          //初始邮件发送上限(发送成功记为一次,各种途径发送都将计算在内)
+        'file_max'      =>  10,           //初始文件创建上限(创建成功记为一次,文件删除后不恢复次数)
+        'file_size'     =>  1024*1024*3   //单个文件的上限,单位字节,不可超过3145728(1024*1024*3)字节(3MB),中文每个字节按照当前编码计算,一般为3字节‬
     ),
-    'user_head'=>array(
-        'url'=>"http://q1.qlogo.cn/g?b=qq&nk=\${head_portrait}&s=640", //获取qq头像的url地址,这里支持使用“${head_portrait}”来代替用户提交的动态参数
-        'default'=>"1"                                                 //默认qq头像的qq号
+    'user_head'     =>  array(
+        'url'       =>"http://q1.qlogo.cn/g?b=qq&nk=\${head_portrait}&s=640", //获取qq头像的url地址,这里支持使用“${head_portrait}”来代替用户提交的动态参数
+        'default'   =>"60000"                                                 //默认qq头像的qq号
     )
 );
 

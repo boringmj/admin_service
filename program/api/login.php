@@ -2,10 +2,12 @@
 
 #program/api/login
 
-//引入User类文件
+//引入类文件
 include_class("User");
-//实例化User类
+include_class("Expansion");
+//实例化r类
 $User=new User();
+$Expansion=new Expansion();
 //同步参数
 $User->setStartSalt($main_config['user_info']['start_salt']);
 $User->setEndSalt($main_config['user_info']['end_salt']);
@@ -207,37 +209,104 @@ if(getPermission($_POST['app_id'],'api_login')==='Y')
                                 if($server_sign===$_POST['sign'])
                                 {
                                     //web签名验证通过
-                                    //设置必要参数
-                                    $User->app_id=$_POST['app_id'];
-                                    $User->database_object=$Database;
-                                    //尝试登录
-                                    if($User->UserLogin($_POST['user'],$_POST['passwd']))
+                                    //进行人机验证
+                                    $verify_try=false;
+                                    if($system_config['vaptcha']['verify']['open'])
                                     {
-                                        //存储session
-                                        session_start();
-                                        $_SESSION['uuid']=$User->uuid;
-                                        $_SESSION['ukey']=$User->ukey;
-                                        $_SESSION['app_id']=$_POST['app_id'];
-                                        //将信息返回给客户端
-                                        setcookie("uuid",$User->uuid);
-                                        //返回uuid,ukey和昵称
-                                        $result_code=0;
-                                        $result_content="登录成功";
-                                        $result['array']['api']=array(
-                                            'title'=>"成功",
-                                            'content'=>$result_content,
-                                            'code'=>$result_code,
-                                            'variable'=>array(
-                                                'uuid'=>$User->uuid,
-                                                'ukey'=>$User->ukey,
-                                                'nickname'=>$User->user_info['nickname']
-                                            )
-                                        );
+                                        if(empty($_POST['token'])||empty($_SERVER['REMOTE_ADDR']))
+                                        {
+                                            $result_code=1074;
+                                            $result_content='请求被拦截';
+                                            $result['array']['api']=array(
+                                                'title'=>"失败",
+                                                'content'=>$result_content,
+                                                'code'=>$result_code,
+                                                'variable'=>""
+                                            );
+                                            $result['exit']=1;
+                                        }
+                                        else
+                                        {
+                                            $params=array(
+                                                'id'=>$system_config['vaptcha']['verify']['vid'],
+                                                'secretkey'=>$system_config['vaptcha']['verify']['key'],
+                                                'scene'=>'0',
+                                                'token'=>$_POST['token'],
+                                                'ip'=>$_SERVER['REMOTE_ADDR'],
+                                            );
+                                            $response=$Expansion->doHttpPost($system_config['vaptcha']['verify']['url'],$params);
+                                            if($response)
+                                            {
+                                                $response=json_decode($response);
+                                                if($response->success==1)
+                                                {
+                                                    $verify_try=true;
+                                                }
+                                                else
+                                                {
+                                                    $result_code=1076;
+                                                    $result_content='验证失败';
+                                                    $result['array']['api']=array(
+                                                        'title'=>"失败",
+                                                        'content'=>$result_content,
+                                                        'code'=>$result_code,
+                                                        'variable'=>$response->msg
+                                                    );
+                                                    $result['exit']=1;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                $result_code=1075;
+                                                $result_content='验证服务器集群无反应';
+                                                $result['array']['api']=array(
+                                                    'title'=>"失败",
+                                                    'content'=>$result_content,
+                                                    'code'=>$result_code,
+                                                    'variable'=>""
+                                                );
+                                                $result['exit']=1;
+                                            }
+                                        }
                                     }
                                     else
                                     {
-                                        $result['array']['api']=$User->error_info['UserLogin'];
-                                        $result['exit']=1;
+                                        $verify_try=true;
+                                    }
+                                    if($verify_try)
+                                    {
+                                        //设置必要参数
+                                        $User->app_id=$_POST['app_id'];
+                                        $User->database_object=$Database;
+                                        //尝试登录
+                                        if($User->UserLogin($_POST['user'],$_POST['passwd']))
+                                        {
+                                            //存储session
+                                            session_start();
+                                            $_SESSION['uuid']=$User->uuid;
+                                            $_SESSION['ukey']=$User->ukey;
+                                            $_SESSION['app_id']=$_POST['app_id'];
+                                            //将信息返回给客户端
+                                            setcookie("uuid",$User->uuid);
+                                            //返回uuid,ukey和昵称
+                                            $result_code=0;
+                                            $result_content="登录成功";
+                                            $result['array']['api']=array(
+                                                'title'=>"成功",
+                                                'content'=>$result_content,
+                                                'code'=>$result_code,
+                                                'variable'=>array(
+                                                    'uuid'=>$User->uuid,
+                                                    'ukey'=>$User->ukey,
+                                                    'nickname'=>$User->user_info['nickname']
+                                                )
+                                            );
+                                        }
+                                        else
+                                        {
+                                            $result['array']['api']=$User->error_info['UserLogin'];
+                                            $result['exit']=1;
+                                        }
                                     }
                                 }
                                 else

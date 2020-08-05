@@ -125,7 +125,6 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                         $_POST['span_name']=mb_substr($_POST['span_name'],0,16);
                                         //写入创建的应用数据
                                         $table_name=$Database->getTablename('admin_api_user_library');
-                                        $flid=getRandstringid();
                                         $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(time_stamp,expired_time_stamp,span_id,span_name,uuid,app_id) VALUES (:time_stamp,:expired_time_stamp,:span_id,:span_name,:uuid,:app_id)");
                                         $expired_time_stamp=$server_time_stamp+30*24*60*60;
                                         $span_id=time().getRandomstring(22);
