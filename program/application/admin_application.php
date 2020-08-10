@@ -126,6 +126,9 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                         {
                                             if($Admin->setBalance(-$main_config['admin_config']['create_balance'])!=-1)
                                             {
+                                                //取原始数据值
+                                                $_POST['application_name']=base64_decode($_POST['application_name']);
+                                                $_POST['application_note']=base64_decode($_POST['application_note']);
                                                 //处理用户提交的数据
                                                 $_POST['application_name']=mb_substr($_POST['application_name'],0,16);
                                                 $_POST['application_note']=mb_substr($_POST['application_note'],0,64);
