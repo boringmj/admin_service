@@ -129,60 +129,75 @@ if(getPermission($_POST['app_id'],'application_api')==='Y')
                                                 //取原始数据值
                                                 $_POST['application_name']=base64_decode($_POST['application_name']);
                                                 $_POST['application_note']=base64_decode($_POST['application_note']);
-                                                //处理用户提交的数据
-                                                $_POST['application_name']=mb_substr($_POST['application_name'],0,16);
-                                                $_POST['application_note']=mb_substr($_POST['application_note'],0,64);
-                                                //写入创建的应用数据
-                                                $table_name=$Database->getTablename('admin_application');
-                                                $flid=getRandstringid();
-                                                $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(time_stamp,uuid,user_count,user_max,views_count,mail_count,mail_max,file_count,file_max,expired_time_stamp,apid,ap_title,ap_content,application_name,application_note,api_id,api_key,app_id) VALUES (:time_stamp,:uuid,0,:user_max,0,0,:mail_max,0,:file_max,:expired_time_stamp,'','','',:application_name,:application_note,:api_id,:api_key,:app_id)");
-                                                $expired_time_stamp=$server_time_stamp+$main_config['admin_config']['create_time'];
-                                                $api_id=time().getRandomstring(22);
-                                                $api_key=getRandomstring(36);
-                                                $sql_statement->bindParam(':time_stamp',$server_time_stamp);
-                                                $sql_statement->bindParam(':uuid',$_POST['uuid']);
-                                                $sql_statement->bindParam(':user_max',$main_config['admin_config']['application']['user_max']);
-                                                $sql_statement->bindParam(':mail_max',$main_config['admin_config']['application']['mail_max']);
-                                                $sql_statement->bindParam(':file_max',$main_config['admin_config']['application']['file_max']);
-                                                $sql_statement->bindParam(':expired_time_stamp',$expired_time_stamp);
-                                                $sql_statement->bindParam(':application_name',$_POST['application_name']);
-                                                $sql_statement->bindParam(':application_note',$_POST['application_note']);
-                                                $sql_statement->bindParam(':api_id',$api_id);
-                                                $sql_statement->bindParam(':api_key',$api_key);
-                                                $sql_statement->bindParam(':app_id',$_POST['app_id']);
-                                                if($sql_statement->execute())
+                                                if(empty($_POST['application_name'])||empty($_POST['application_note']))
                                                 {
-                                                    //创建成功就记一次本月创建应用,不验证成功
-                                                    $table_name=$Database->getTablename('admin_user');
-                                                    $create_count_month+=1;
-                                                    $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET create_count=:create_count WHERE uuid=:uuid");
-                                                    $sql_statement->bindParam(':create_count',$create_count_month);
-                                                    $sql_statement->bindParam(':uuid',$_POST['uuid']);
-                                                    $sql_statement->execute();
-                                                    $result_code=0;
-                                                    $result_content='已成功创建应用';
-                                                    $result['array']['application']=array(
-                                                        'title'=>"成功",
-                                                        'content'=>$result_content,
-                                                        'code'=>$result_code,
-                                                        'variable'=>array(
-                                                            'uuid'=>$_POST['uuid'],
-                                                            'api_id'=>$api_id,
-                                                            'api_key'=>$api_key
-                                                        )
-                                                    );
-                                                }
-                                                else
-                                                {
-                                                    $result_code=1018;
-                                                    $result_content='异常错误';
+                                                    $result_code=1078;
+                                                    $result_content='无法取得原始数据';
                                                     $result['array']['application']=array(
                                                         'title'=>"失败",
                                                         'content'=>$result_content,
                                                         'code'=>$result_code,
-                                                        'variable'=>''
+                                                        'variable'=>""
                                                     );
                                                     $result['exit']=1;
+                                                }
+                                                else
+                                                {
+                                                    //处理用户提交的数据
+                                                    $_POST['application_name']=mb_substr($_POST['application_name'],0,16);
+                                                    $_POST['application_note']=mb_substr($_POST['application_note'],0,64);
+                                                    //写入创建的应用数据
+                                                    $table_name=$Database->getTablename('admin_application');
+                                                    $flid=getRandstringid();
+                                                    $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(time_stamp,uuid,user_count,user_max,views_count,mail_count,mail_max,file_count,file_max,expired_time_stamp,apid,ap_title,ap_content,application_name,application_note,api_id,api_key,app_id) VALUES (:time_stamp,:uuid,0,:user_max,0,0,:mail_max,0,:file_max,:expired_time_stamp,'','','',:application_name,:application_note,:api_id,:api_key,:app_id)");
+                                                    $expired_time_stamp=$server_time_stamp+$main_config['admin_config']['create_time'];
+                                                    $api_id=time().getRandomstring(22);
+                                                    $api_key=getRandomstring(36);
+                                                    $sql_statement->bindParam(':time_stamp',$server_time_stamp);
+                                                    $sql_statement->bindParam(':uuid',$_POST['uuid']);
+                                                    $sql_statement->bindParam(':user_max',$main_config['admin_config']['application']['user_max']);
+                                                    $sql_statement->bindParam(':mail_max',$main_config['admin_config']['application']['mail_max']);
+                                                    $sql_statement->bindParam(':file_max',$main_config['admin_config']['application']['file_max']);
+                                                    $sql_statement->bindParam(':expired_time_stamp',$expired_time_stamp);
+                                                    $sql_statement->bindParam(':application_name',$_POST['application_name']);
+                                                    $sql_statement->bindParam(':application_note',$_POST['application_note']);
+                                                    $sql_statement->bindParam(':api_id',$api_id);
+                                                    $sql_statement->bindParam(':api_key',$api_key);
+                                                    $sql_statement->bindParam(':app_id',$_POST['app_id']);
+                                                    if($sql_statement->execute())
+                                                    {
+                                                        //创建成功就记一次本月创建应用,不验证成功
+                                                        $table_name=$Database->getTablename('admin_user');
+                                                        $create_count_month+=1;
+                                                        $sql_statement=$Database->object->prepare("UPDATE {$table_name} SET create_count=:create_count WHERE uuid=:uuid");
+                                                        $sql_statement->bindParam(':create_count',$create_count_month);
+                                                        $sql_statement->bindParam(':uuid',$_POST['uuid']);
+                                                        $sql_statement->execute();
+                                                        $result_code=0;
+                                                        $result_content='已成功创建应用';
+                                                        $result['array']['application']=array(
+                                                            'title'=>"成功",
+                                                            'content'=>$result_content,
+                                                            'code'=>$result_code,
+                                                            'variable'=>array(
+                                                                'uuid'=>$_POST['uuid'],
+                                                                'api_id'=>$api_id,
+                                                                'api_key'=>$api_key
+                                                            )
+                                                        );
+                                                    }
+                                                    else
+                                                    {
+                                                        $result_code=1018;
+                                                        $result_content='异常错误';
+                                                        $result['array']['application']=array(
+                                                            'title'=>"失败",
+                                                            'content'=>$result_content,
+                                                            'code'=>$result_code,
+                                                            'variable'=>''
+                                                        );
+                                                        $result['exit']=1;
+                                                    }
                                                 }
                                             }
                                             else

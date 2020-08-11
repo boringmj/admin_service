@@ -10,8 +10,8 @@ $server_variable=array(
     'time_stamp'=>time(),
     'uuid'=>isset($_GET['uuid'])?$_GET['uuid']:"",
     'ukey'=>isset($_GET['ukey'])?$_GET['ukey']:"",
-    'application_name'=>isset($_GET['application_name'])?$_GET['application_name']:"6661",
-    'application_note'=>isset($_GET['application_note'])?$_GET['application_note']:"6662"
+    'application_name'=>base64_encode(isset($_GET['application_name'])?$_GET['application_name']:"6661"),
+    'application_note'=>base64_encode(isset($_GET['application_note'])?$_GET['application_note']:"6662")
 );
 $server_sign='';
 foreach($server_variable as $key=>$value)

@@ -102,60 +102,75 @@ else
                             //取原始数据值
                             $_POST['title']=base64_decode($_POST['title']);
                             $_POST['content']=base64_decode($_POST['content']);
-                            //抛弃超过系统最大存储空间的数据
-                            $_POST['title']=mb_substr($_POST['title'],0,32);
-                            $_POST['content']=mb_substr($_POST['content'],0,1024*5);
-                            //设置必要参数
-                            $User->app_id=$_POST['app_id'];
-                            $User->database_object=$Database;
-                            //设置uuid和ukey
-                            $User->setUuid($_POST['uuid']);
-                            $User->setUkey($_POST['ukey']);
-                            //获取用户信息(直接判断是否登录无法验证用户是否处于激活状态)
-                            $User->getUserInfo();
-                            //验证用户是否登录成功
-                            if($User->user_info['get'])
+                            if(empty($_POST['title'])||empty($_POST['content']))
                             {
-                                //存储教程
-                                $table_name=$Database->getTablename('tutorial');
-                                $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(time_stamp,nickname,uuid,app_id,tid,like_number,reward_number,watch_number,restatus,title,content) VALUES (:time_stamp,:nickname,:uuid,:app_id,:tid,0,0,0,'U',:title,:content)");
-                                $tid=getRandstringid();
-                                $sql_statement->bindParam(':time_stamp',$server_time_stamp);
-                                $sql_statement->bindParam(':nickname',$User->user_info['nickname']);
-                                $sql_statement->bindParam(':uuid',$_POST['uuid']);
-                                $sql_statement->bindParam(':app_id',$_POST['app_id']);
-                                $sql_statement->bindParam(':tid',$tid);
-                                $sql_statement->bindParam(':title',$_POST["title"]);
-                                $sql_statement->bindParam(':content',$_POST["content"]);
-                                if($sql_statement->execute())
-                                {
-                                    $result_code=0;
-                                    $result_content='提交成功';
-                                    $result['array']['application']=array(
-                                        'title'=>"成功",
-                                        'content'=>$result_content,
-                                        'code'=>$result_code,
-                                        'variable'=>"请等待审核"
-                                    );
-                                }
-                                else
-                                {
-                                    $result_code=1018;
-                                    $result_content='异常错误';
-                                    $result['array']['application']=array(
-                                        'title'=>"失败",
-                                        'content'=>$result_content,
-                                        'code'=>$result_code,
-                                        'variable'=>""
-                                    );
-                                    $result['exit']=1;
-                                }
+                                $result_code=1078;
+                                $result_content='无法取得原始数据';
+                                $result['array']['application']=array(
+                                    'title'=>"失败",
+                                    'content'=>$result_content,
+                                    'code'=>$result_code,
+                                    'variable'=>""
+                                );
+                                $result['exit']=1;
                             }
                             else
                             {
-                                $result['array']['application']=$User->error_info['getUserInfo'];
-                                $result['exit']=1;
-                            }    
+                                //抛弃超过系统最大存储空间的数据
+                                $_POST['title']=mb_substr($_POST['title'],0,32);
+                                $_POST['content']=mb_substr($_POST['content'],0,1024*5);
+                                //设置必要参数
+                                $User->app_id=$_POST['app_id'];
+                                $User->database_object=$Database;
+                                //设置uuid和ukey
+                                $User->setUuid($_POST['uuid']);
+                                $User->setUkey($_POST['ukey']);
+                                //获取用户信息(直接判断是否登录无法验证用户是否处于激活状态)
+                                $User->getUserInfo();
+                                //验证用户是否登录成功
+                                if($User->user_info['get'])
+                                {
+                                    //存储教程
+                                    $table_name=$Database->getTablename('tutorial');
+                                    $sql_statement=$Database->object->prepare("INSERT INTO {$table_name}(time_stamp,nickname,uuid,app_id,tid,like_number,reward_number,watch_number,restatus,title,content) VALUES (:time_stamp,:nickname,:uuid,:app_id,:tid,0,0,0,'U',:title,:content)");
+                                    $tid=getRandstringid();
+                                    $sql_statement->bindParam(':time_stamp',$server_time_stamp);
+                                    $sql_statement->bindParam(':nickname',$User->user_info['nickname']);
+                                    $sql_statement->bindParam(':uuid',$_POST['uuid']);
+                                    $sql_statement->bindParam(':app_id',$_POST['app_id']);
+                                    $sql_statement->bindParam(':tid',$tid);
+                                    $sql_statement->bindParam(':title',$_POST["title"]);
+                                    $sql_statement->bindParam(':content',$_POST["content"]);
+                                    if($sql_statement->execute())
+                                    {
+                                        $result_code=0;
+                                        $result_content='提交成功';
+                                        $result['array']['application']=array(
+                                            'title'=>"成功",
+                                            'content'=>$result_content,
+                                            'code'=>$result_code,
+                                            'variable'=>"请等待审核"
+                                        );
+                                    }
+                                    else
+                                    {
+                                        $result_code=1018;
+                                        $result_content='异常错误';
+                                        $result['array']['application']=array(
+                                            'title'=>"失败",
+                                            'content'=>$result_content,
+                                            'code'=>$result_code,
+                                            'variable'=>""
+                                        );
+                                        $result['exit']=1;
+                                    }
+                                }
+                                else
+                                {
+                                    $result['array']['application']=$User->error_info['getUserInfo'];
+                                    $result['exit']=1;
+                                }
+                            }   
                         }
                         else
                         {

@@ -10,7 +10,7 @@ $server_variable=array(
     'time_stamp'=>time(),
     'uuid'=>isset($_GET['uuid'])?$_GET['uuid']:"",
     'ukey'=>isset($_GET['ukey'])?$_GET['ukey']:"",
-    'span_name'=>isset($_GET['span_name'])?$_GET['span_name']:"6661"
+    'span_name'=>base64_encode(isset($_GET['span_name'])?$_GET['span_name']:"6661")
 );
 $server_sign='';
 foreach($server_variable as $key=>$value)
