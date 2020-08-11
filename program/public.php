@@ -2,8 +2,12 @@
 
 #program/public
 
-if(isset($_GET['mode'])&&isset($_GET['type']))
+if(isset($_GET['mode']))
 {
+    //设置不必须参数
+    if(empty($_GET['type']))
+    $_GET['type']='text/html';
+
     $template=$_GET['mode'];
     $template=$main_config['html_config']['public'].'/'.$template;
     if(!preg_match('/(.*\.\..*)/',$template)&&is_file($template))

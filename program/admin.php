@@ -13,11 +13,11 @@ $User->setEndSalt($main_config['user_info']['end_salt']);
 session_start();
 
 //补全不必要参数
-if(!isset($_GET['mode']))
+if(empty($_GET['mode']))
     $_GET['mode']='index';
-if(!isset($_GET['type']))
+if(empty($_GET['type']))
     $_GET['type']='text/html';
-if(!isset($_COOKIE['uuid']))
+if(empty($_COOKIE['uuid']))
     $_COOKIE['uuid']='';
 
 //接收get方式传递的值
@@ -83,6 +83,6 @@ if($User->getUserInfo()&&$_SESSION['uuid']===$_COOKIE['uuid'])
 }
 else
 {
-    header("location:/?class=public&mode=login.html&type=text/html&value=".urlencode("class=admin&mode={$_GET['mode']}&type={$_GET['type']}"));
+    header("location:/?class=public&mode=login.html".($_GET['type']=="text/html"?"":"&type={$_GET['type']}")."&value=".urlencode("class=admin&mode={$_GET['mode']}".($_GET['type']=="text/html"?"":"&type={$_GET['type']}")));
 }
 ?>
