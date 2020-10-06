@@ -38,6 +38,8 @@ else if($_GET['mode']==='check')
 }
 else if($_GET['mode']==='from')
 {
+    if(!isset($_SESSION['tncode_check']))
+        $_SESSION['tncode_check']='';
     if($_SESSION['tncode_check']==='ok')
     {
         echo '验证通过';

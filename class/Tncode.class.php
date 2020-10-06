@@ -70,6 +70,8 @@ class Tncode
         imagedestroy($this->im_slide);
     }
     private function _imgout(){
+        if(!isset($_GET['nowebp']))
+            $_GET['nowebp']='';
         if(!$_GET['nowebp']&&function_exists('imagewebp')){//优先webp格式，超高压缩率
             $type = 'webp';
             $quality = 40;//图片质量 0-100

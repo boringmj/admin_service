@@ -1,0 +1,5 @@
+public/login.html
+#44 vid
+#67 app_id
+#74 app_key
+#79 app_id
