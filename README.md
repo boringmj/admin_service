@@ -2,7 +2,8 @@
 一个后台管理项目 <br>
 本项目开发者:无聊的莫稽(wuliaodemoji@wuliaomj.com) <br>
 项目测试环境:lnmp(linux/CentOS7 + php/7.3.6 + mysql/5.5.62 + nginx/1.16.0) <br>
-如果有BUG请加QQ3239957605反馈,QQ在线咨询(不能保证我能收到您发送成功的消息):[QQ在线咨询-3239957605](https://wpa.qq.com/msgrd?v=3&uin=3239957605&site=qq&menu=yes&from=message&isappinstalled=0) <br>
+如果有BUG请加QQ3239957605反馈,QQ在线咨询(不能保证我能收到您发送成功的消息):[QQ在线咨询-3239957605](https://wpa.qq.com/msgrd?v=3&uin=3239957605&site=qq&menu=yes&from=message&isappinstalled=0) <br
+项目于2020年11月22日正式宣布停止更新
 
 # 特别声明
 1. 本项目仅允许学习参考,未得到本项目开发者允许的情况下严禁在任何公网环境下搭建、使用
